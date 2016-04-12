@@ -5,13 +5,14 @@ import datetime
 from models import *
 from forms import *
 import logging
-
+from django.utils.translation import ugettext_lazy as _
+from django.core.urlresolvers import reverse
 import simplejson as json
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.utils.translation import ugettext, ugettext_lazy as _
@@ -27,7 +28,7 @@ from fobi.dynamic import assemble_form_class
 from fobi.decorators import permissions_required, SATISFY_ALL, SATISFY_ANY
 from fobi.base import (
     fire_form_callbacks, run_form_handlers, form_element_plugin_registry,
-    form_handler_plugin_registry, submit_plugin_form_data, get_theme,
+    form_handler_plugin_registry, submit_plugin_form_data, get_theme, get_processed_form_data
     #get_registered_form_handler_plugins
 )
 from fobi.form_importers import (
@@ -53,6 +54,12 @@ from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
 
 logger = logging.getLogger(__name__)
 
+def info_inscripto(request, idInscripto):
+    inscripto = get_object_or_404(Inscripcion_Base, pk=idInscripto)
+    dato = json.loads(inscripto.datos)
+    print(dato)
+    print(dato['peregrino_que_te_invito'])
+    return HttpResponse("Hello, world. You're at the polls index.")
 
 def form(request, form_entry_slug, theme=None, template_name=None):
     """
@@ -107,11 +114,13 @@ def form(request, form_entry_slug, theme=None, template_name=None):
 def inscripcion_actividad(request, idActividad):
     actividad = get_object_or_404(Actividad, pk=idActividad)
     if request.method == 'POST':
-
-        form = InscripcionBaseForm(request.POST)
+        inscripcion = Inscripcion_Base()
+        inscripcion.actividad = actividad
+        form = InscripcionBaseForm(request.POST, instance=inscripcion)
         if form.is_valid():
-            form.actividad = actividad
-            form.save()
+            inscripto = form.save()
+            return HttpResponseRedirect('/inscripto/' + str(inscripto.id))
+
 
     else:
         form = InscripcionBaseForm()
@@ -124,6 +133,68 @@ def inscripcion_actividad(request, idActividad):
     return render_to_response('form.html', context,
                               context_instance=RequestContext(request))
 
+def inscripcion_extra(request, idInscripto):
+    inscripto = get_object_or_404(Inscripcion_Base, pk=idInscripto)
+    form_entry = inscripto.actividad.detalle
+
+    form_element_entries = form_entry.formelemententry_set.all()[:]
+    # This is where the most of the magic happens. Our form is being built
+    # dynamically.
+    FormClass = assemble_form_class(
+        form_entry,
+        form_element_entries = form_element_entries,
+        request = request
+    )
+
+    if 'POST' == request.method:
+        form = FormClass(request.POST, request.FILES)
+
+
+        if form.is_valid():
+            field_name_to_label_map, cleaned_data = get_processed_form_data(
+            form,
+            form_element_entries
+            )
+            for key, value in cleaned_data.items():
+                if isinstance(value, (datetime.datetime, datetime.date)):
+                    cleaned_data[key] = value.isoformat() if hasattr(value, 'isoformat') else value
+            inscripto.datos = json.dumps(cleaned_data)
+            inscripto.save()
+
+            messages.info(
+                request,
+                _("Form {0} was submitted successfully."
+                  "").format(form_entry.name)
+            )
+            return redirect(
+                reverse('fobi.form_entry_submitted', args=[form_entry.slug])
+            )
+
+
+    else:
+        # Providing initial form data by feeding entire GET dictionary
+        # to the form, if ``GET_PARAM_INITIAL_DATA`` is present in the
+        # GET.
+        kwargs = {}
+        if GET_PARAM_INITIAL_DATA in request.GET:
+            kwargs = {'initial': request.GET}
+        form = FormClass(**kwargs)
+
+    # In debug mode, try to identify possible problems.
+    if DEBUG:
+        try:
+            form.as_p()
+        except Exception as err:
+            logger.error(err)
+
+
+    context = {
+        'form': form,
+    }
+
+
+    return render_to_response('form.html', context,
+                              context_instance=RequestContext(request))
 
 def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
     """

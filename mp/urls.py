@@ -36,4 +36,6 @@ urlpatterns = [
     url(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', 'inscripcion.views.form'),
 
     url(r'^actividad/(?P<idActividad>\d+)/$', 'inscripcion.views.inscripcion_actividad'),
+    url(r'^inscripto/(?P<idInscripto>\d+)/$', 'inscripcion.views.inscripcion_extra'),
+    url(r'^info/(?P<idInscripto>\d+)/$', 'inscripcion.views.info_inscripto'),
 ]
