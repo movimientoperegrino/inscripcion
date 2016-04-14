@@ -38,4 +38,5 @@ urlpatterns = [
     url(r'^actividad/(?P<idActividad>\d+)/$', 'inscripcion.views.inscripcion_actividad'),
     url(r'^inscripto/(?P<idInscripto>\d+)/$', 'inscripcion.views.inscripcion_extra'),
     url(r'^info/(?P<idInscripto>\d+)/$', 'inscripcion.views.info_inscripto'),
+    url(r'^info2/$', 'inscripcion.views.info_inscripto'),
 ]

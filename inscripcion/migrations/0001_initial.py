@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fobi', '0004_auto_20160414_0022'),
+        ('fobi', '0003_auto_20160414_0054'),
     ]
 
     operations = [
@@ -53,6 +53,14 @@ class Migration(migrations.Migration):
                 ('direccion', models.TextField(verbose_name=b'Direcci\xc3\xb3n', blank=True)),
                 ('descripcion', models.TextField(verbose_name=b'Descripci\xc3\xb3n', blank=True)),
                 ('url', models.URLField(blank=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Parametro',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('clave', models.CharField(max_length=100)),
+                ('valor', models.TextField()),
             ],
         ),
         migrations.AddField(

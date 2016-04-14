@@ -3,6 +3,9 @@ from django.db import models
 from fobi.models import FormEntry
 # Create your models here.
 
+class Parametro(models.Model):
+    clave = models.CharField(max_length=100)
+    valor = models.TextField()
 
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre *")

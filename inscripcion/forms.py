@@ -7,3 +7,9 @@ class InscripcionBaseForm(forms.ModelForm):
         model = InscripcionBase
         exclude = ['datos','actividad']
 
+
+class InscriptoInfo(forms.ModelForm):
+    class Meta:
+        model = InscripcionBase
+        exclude = ['id']
+

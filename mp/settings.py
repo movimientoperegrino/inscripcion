@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+DESARROLLO = True
+# Parametros del Sistema
+MAIL_TITULAR_KEY = "MAIL_TITULAR"
+MAIL_SUPLENTE_KEY = "MAIL_SUPLENTE"
+SECRET_HASH_KEY = "SECRET_HASH"
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -163,3 +169,13 @@ STATIC_URL = '/static/'
 
 
 SITE_ID = 1
+
+
+#Configuracion del email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'mail.movimientoperegrino.org'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'retiros-noreply@movimientoperegrino.org'
+EMAIL_HOST_PASSWORD = 'macabeos1974!'
+DEFAULT_FROM_EMAIL = 'retiros-noreply@movimientoperegrino.org'
+DEFAULT_TO_EMAIL = 'retiros-noreply@movimientoperegrino.org'

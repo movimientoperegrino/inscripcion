@@ -1,3 +1,4 @@
+#encoding=utf8
 from django.shortcuts import render
 
 # Create your views here.
@@ -54,12 +55,16 @@ from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
 
 logger = logging.getLogger(__name__)
 
-def info_inscripto(request, idInscripto):
-    inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
-    dato = json.loads(inscripto.datos)
-    print(dato)
-    print(dato['peregrino_que_te_invito'])
-    return HttpResponse("Hello, world. You're at the polls index.")
+def info_inscripto(request):
+    m = request.GET.get('m')
+    text = request.GET.get('text')
+    inscripto_id = decode_data(m, text)
+    inscripto = InscripcionBase.objects.get(id=inscripto_id)
+    form = InscriptoInfo(instance=inscripto)
+    context = {'form': form}
+    return render_to_response('form.html', context,
+                              context_instance=RequestContext(request))
+
 
 def form(request, form_entry_slug, theme=None, template_name=None):
     """
@@ -113,18 +118,26 @@ def form(request, form_entry_slug, theme=None, template_name=None):
 
 def inscripcion_actividad(request, idActividad):
     actividad = get_object_or_404(Actividad, pk=idActividad)
+    print request.get_full_path()
     if request.method == 'POST':
         inscripcion = InscripcionBase()
         inscripcion.actividad = actividad
         form = InscripcionBaseForm(request.POST, instance=inscripcion)
         if form.is_valid():
             inscripto = form.save()
+            m, txt = encode_data(inscripto.id)
+            print m
+            print txt
+            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/info2?m=' + m + '&text=' + txt
+            enviar_mail_inscripcion(inscripto, url_info)
             return HttpResponseRedirect('/inscripto/' + str(inscripto.id))
 
 
     else:
         form = InscripcionBaseForm()
 
+    print request.META['HTTP_HOST']
+    print request.scheme
     context = {
         'form': form,
     }
@@ -319,3 +332,75 @@ def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
 
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
+
+
+from django.conf import settings
+from django.template import Template, Context
+
+
+def envio_mail(destino, cuerpo, asunto, adjunto=None):
+    from django.core.validators import validate_email
+    from django.core.exceptions import ValidationError
+    from django.core.mail import EmailMultiAlternatives
+
+    origen = '[Movimiento Peregrino] <retiros-noreply@movimientoperegrino.org>'
+    destino = 'informatica@movimientoperegrino.org' if settings.DESARROLLO else destino
+
+    try:
+        #validate_email(destino)
+        msg = EmailMultiAlternatives(asunto, cuerpo, origen, [destino])
+        msg.attach_alternative(cuerpo, 'text/html')
+        msg.send()
+    except ValidationError:
+        print "Error en el envio de mail"
+
+def enviar_mail_inscripcion(inscripcion_guardada, url_info):
+   """ Prepara y envia el mail para una inscripción realizada.
+   """
+
+   actividad = inscripcion_guardada.actividad
+
+   template = None
+   html_render = None
+   context = None
+   if True: #inscripcion_guardada.posicion <= actividad.cantidad_titulares:
+       context = Context(
+           {'inscripto': inscripcion_guardada, 'contactoTitular': inscripcion_guardada.actividad.emailContacto,'mail_url': url_info})
+       parametro = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)
+       template = Template(parametro.valor)
+   else:
+       context = Context(
+           {'inscripto': inscripcion_guardada, 'contactoTitular': inscripcion_guardada.actividad.emailContacto,
+           'url_info': url_info})
+       parametro = Parametro.objects.get(clave=settings.MAIL_SUPLENTE_KEY)
+       template = Template(parametro.valor)
+
+   html_render = template.render(context)
+   envio_mail(inscripcion_guardada.mail, html_render, inscripcion_guardada.actividad.nombre)
+
+
+
+import hashlib, zlib
+import cPickle as pickle
+import urllib
+
+my_secret = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)
+
+def encode_data(data):
+    """Turn `data` into a hash and an encoded string, suitable for use with `decode_data`."""
+    text = zlib.compress(pickle.dumps(data, 0)).encode('base64').replace('\n', '')
+    m = hashlib.md5(my_secret.valor + text).hexdigest()[:12]
+
+    return m, text
+
+def decode_data(hash, enc):
+    """The inverse of `encode_data`."""
+    text = urllib.unquote(enc)
+    m = hashlib.md5(my_secret.valor + text).hexdigest()[:12]
+    if m != hash:
+        raise Exception("Bad hash!")
+    data = pickle.loads(zlib.decompress(text.decode('base64')))
+
+    return data
+
+    #print decode_data(hash, enc)

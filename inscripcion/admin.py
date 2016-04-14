@@ -4,3 +4,4 @@ from models import *
 admin.site.register(Actividad)
 admin.site.register(InscripcionBase)
 admin.site.register(Lugar)
+admin.site.register(Parametro)
