@@ -55,7 +55,7 @@ from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
 logger = logging.getLogger(__name__)
 
 def info_inscripto(request, idInscripto):
-    inscripto = get_object_or_404(Inscripcion_Base, pk=idInscripto)
+    inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
     dato = json.loads(inscripto.datos)
     print(dato)
     print(dato['peregrino_que_te_invito'])
@@ -114,7 +114,7 @@ def form(request, form_entry_slug, theme=None, template_name=None):
 def inscripcion_actividad(request, idActividad):
     actividad = get_object_or_404(Actividad, pk=idActividad)
     if request.method == 'POST':
-        inscripcion = Inscripcion_Base()
+        inscripcion = InscripcionBase()
         inscripcion.actividad = actividad
         form = InscripcionBaseForm(request.POST, instance=inscripcion)
         if form.is_valid():
@@ -134,7 +134,7 @@ def inscripcion_actividad(request, idActividad):
                               context_instance=RequestContext(request))
 
 def inscripcion_extra(request, idInscripto):
-    inscripto = get_object_or_404(Inscripcion_Base, pk=idInscripto)
+    inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
     form_entry = inscripto.actividad.detalle
 
     form_element_entries = form_entry.formelemententry_set.all()[:]

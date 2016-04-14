@@ -11,7 +11,7 @@ class Actividad(models.Model):
         return self.nombre
 
 
-class Inscripcion_Base(models.Model):
+class InscripcionBase(models.Model):
     #nombre = models.CharField(max_length=100, verbose_name="Nombre")
     #apellido = models.CharField(max_length=100)
     cedula = models.CharField(max_length=30)

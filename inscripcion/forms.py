@@ -4,6 +4,6 @@ from models import *
 
 class InscripcionBaseForm(forms.ModelForm):
     class Meta:
-        model = Inscripcion_Base
+        model = InscripcionBase
         exclude = ['datos','actividad']
 
