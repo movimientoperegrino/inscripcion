@@ -3,3 +3,4 @@ from models import *
 # Register your models here.
 admin.site.register(Actividad)
 admin.site.register(InscripcionBase)
+admin.site.register(Lugar)

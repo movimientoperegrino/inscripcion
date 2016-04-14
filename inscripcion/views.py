@@ -135,7 +135,7 @@ def inscripcion_actividad(request, idActividad):
 
 def inscripcion_extra(request, idInscripto):
     inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
-    form_entry = inscripto.actividad.detalle
+    form_entry = inscripto.actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
     # This is where the most of the magic happens. Our form is being built
