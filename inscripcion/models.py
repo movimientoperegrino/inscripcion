@@ -8,7 +8,7 @@ class Parametro(models.Model):
     valor = models.TextField()
 
 class Lugar(models.Model):
-    nombre = models.CharField(max_length=100, verbose_name="Nombre *")
+    nombre = models.CharField(max_length=100, verbose_name="Nombre")
     direccion = models.TextField(blank=True, verbose_name="Dirección")
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     url = models.URLField(blank=True)
@@ -17,7 +17,7 @@ class Lugar(models.Model):
         return self.nombre
 
 class Actividad(models.Model):
-    nombre = models.CharField(max_length=100, verbose_name="Nombre *")
+    nombre = models.CharField(max_length=100, verbose_name="Nombre")
     lugar = models.ForeignKey(Lugar, blank=True, null=True)
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     costo = models.CharField(max_length=100)
