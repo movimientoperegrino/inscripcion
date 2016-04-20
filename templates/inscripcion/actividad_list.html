@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load bootstrap3 %}
+
+{% block contenido %}
+    {% regroup object_list by tipo as lista_actividades %}
+
+    {% for tipo in lista_actividades %}
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading"><h4>{{ tipo.grouper }}</h4></div>
+                <div class="panel-body">
+                    {% for i in tipo.list %}
+
+                        <p>{{ i.nombre }} - {{ i.fechaInicio }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+{% endblock %}
