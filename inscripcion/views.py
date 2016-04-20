@@ -473,3 +473,10 @@ def decode_data(hash, enc):
     return data
 
     #print decode_data(hash, enc)
+
+from django.views.generic import ListView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
+
+
+class ActividadList(ListView):
+    queryset = Actividad.objects.all().order_by("tipo_id")

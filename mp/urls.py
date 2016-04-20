@@ -14,6 +14,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from inscripcion import views
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
@@ -32,6 +33,8 @@ urlpatterns = [
     url(r'^view/(?P<form_entry_slug>[\w_\-]+)/$',
         'inscripcion.views.view_form_entry',
         name='fobi.view_form_entry'),
+
+    url(r'^$', views.ActividadList.as_view(), name='inicio'),
 
     url(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', 'inscripcion.views.form'),
 
