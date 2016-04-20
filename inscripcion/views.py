@@ -384,9 +384,9 @@ import hashlib, zlib
 import cPickle as pickle
 import urllib
 
-my_secret = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)
 
 def encode_data(data):
+    my_secret = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)
     """Turn `data` into a hash and an encoded string, suitable for use with `decode_data`."""
     text = zlib.compress(pickle.dumps(data, 0)).encode('base64').replace('\n', '')
     m = hashlib.md5(my_secret.valor + text).hexdigest()[:12]
@@ -394,6 +394,7 @@ def encode_data(data):
     return m, text
 
 def decode_data(hash, enc):
+    my_secret = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)
     """The inverse of `encode_data`."""
     text = urllib.unquote(enc)
     m = hashlib.md5(my_secret.valor + text).hexdigest()[:12]

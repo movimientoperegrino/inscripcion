@@ -7,6 +7,15 @@ class Parametro(models.Model):
     clave = models.CharField(max_length=100)
     valor = models.TextField()
 
+    def __unicode__(self):
+        return self.clave
+
+class TipoActividad(models.Model):
+    nombre =  models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.nombre
+
 class Lugar(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre")
     direccion = models.TextField(blank=True, verbose_name="Dirección")
@@ -18,6 +27,7 @@ class Lugar(models.Model):
 
 class Actividad(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre")
+    tipo = models.ForeignKey(Lugar, blank=True, null=True, verbose_name="Tipo de actividad")
     lugar = models.ForeignKey(Lugar, blank=True, null=True)
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     costo = models.CharField(max_length=100)
