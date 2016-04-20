@@ -3,6 +3,8 @@ from django.shortcuts import render
 
 # Create your views here.
 import datetime
+from datetime import timedelta
+from django.utils import timezone
 from models import *
 from forms import *
 import logging
@@ -116,21 +118,66 @@ def form(request, form_entry_slug, theme=None, template_name=None):
                               context_instance=RequestContext(request))
 
 
+
 def inscripcion_actividad(request, idActividad):
     actividad = get_object_or_404(Actividad, pk=idActividad)
+
+    #si el estado de la actividad es finalizado, termina la inscripcion
+    if actividad.estado == Actividad.FINALIZADO:
+        mensaje = 'La inscripcion a la actividad: "' + actividad.nombre + '" ha finalizado.'
+        mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
+        mensaje += actividad.emailContacto
+        return HttpResponse(mensaje)
+
+    #se controla la cantidad de inscriptos
+    cantidadPermitida = actividad.cantidadSuplentes + actividad.cantidadTitulares
+    cantidadInscriptos = InscripcionBase.objects.filter(actividad=actividad).count()
+    if cantidadInscriptos >= cantidadPermitida:
+        actividad.estado = actividad.FINALIZADO
+        actividad.save()
+        mensaje = 'El cupo  para "' + actividad.nombre + '" se encuentra lleno.'
+        mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
+        mensaje += actividad.emailContacto
+        return HttpResponse(mensaje)
+
+    #se controla la fecha/hora de activacion
+    if timezone.now() < actividad.fechaApertura:
+        mensaje = 'La inscripcion a  la actividad "' + actividad.nombre + '" aun no se encuentra habilitada'
+        return HttpResponse(mensaje)
+    else:
+        if actividad.estado == Actividad.INACTIVO:
+            actividad.estado = Actividad.ACTIVO
+            actividad.save()
+
     print request.get_full_path()
     if request.method == 'POST':
         inscripcion = InscripcionBase()
         inscripcion.actividad = actividad
+        inscripcion.puesto = InscripcionBase.objects.filter(actividad=actividad).count() + 1
         form = InscripcionBaseForm(request.POST, instance=inscripcion)
         if form.is_valid():
+            cedula = form.cleaned_data['cedula']
+
+            #Si ciBoolean es True significa que ya se inscribieron con esa CI
+            ciBoolean = True
+            try:
+                    f = InscripcionBase.objects.get(actividad=actividad, cedula=cedula)
+
+            except ObjectDoesNotExist:
+                    ciBoolean = False
+
+            if ciBoolean == True:
+                suceso = False
+                mensaje = 'ERROR: Usted ya se ha inscripto a esta actividad con esa cedula'
+                return HttpResponse(mensaje)
             inscripto = form.save()
+
             m, txt = encode_data(inscripto.id)
             print m
             print txt
-            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/info2?m=' + m + '&text=' + txt
+            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + m + '&text=' + txt
             enviar_mail_inscripcion(inscripto, url_info)
-            return HttpResponseRedirect('/inscripto/' + str(inscripto.id))
+            return HttpResponseRedirect(url_info)
 
 
     else:
@@ -146,7 +193,10 @@ def inscripcion_actividad(request, idActividad):
     return render_to_response('form.html', context,
                               context_instance=RequestContext(request))
 
-def inscripcion_extra(request, idInscripto):
+def inscripcion_extra(request):
+    m = request.GET.get('m')
+    text = request.GET.get('text')
+    idInscripto = decode_data(m, text)
     inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
     form_entry = inscripto.actividad.formDinamico
 
@@ -203,10 +253,11 @@ def inscripcion_extra(request, idInscripto):
 
     context = {
         'form': form,
+        'inscripto': inscripto,
     }
 
 
-    return render_to_response('form.html', context,
+    return render_to_response('formextra.html', context,
                               context_instance=RequestContext(request))
 
 def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
@@ -363,7 +414,7 @@ def enviar_mail_inscripcion(inscripcion_guardada, url_info):
    template = None
    html_render = None
    context = None
-   if True: #inscripcion_guardada.posicion <= actividad.cantidad_titulares:
+   if inscripcion_guardada.puesto <= actividad.cantidadTitulares: #inscripcion_guardada.posicion <= actividad.cantidad_titulares:
        context = Context(
            {'inscripto': inscripcion_guardada, 'contactoTitular': inscripcion_guardada.actividad.emailContacto,'mail_url': url_info})
        parametro = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)

@@ -9,13 +9,19 @@
     <div class="row">
         <div class="col-sm-12 ">
             <h1>Inscripcion</h1>
-
+            <div class="well">
+                    <p><b>Nombre:</b> {{ inscripto.nombre }}</p>
+                    <p><b>Apellido:</b> {{ inscripto.apellido }}</p>
+                    <p><b>Cedula:</b> {{ inscripto.cedula }}</p>
+                    <p><b>Correo:</b> {{ inscripto.mail }}</p>
+            </div>
         </div>
     </div>
     <div class="row">
         <div class="col-sm-12 ">
             {% bootstrap_messages %}
             <form id="formulario" method="post" action="" class="form">{% csrf_token %}
+
                 {% bootstrap_form form layout='horizontal' %}
                 {% buttons %}
                 <button type="submit" class="btn btn-primary">

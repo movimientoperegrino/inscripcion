@@ -27,7 +27,7 @@ class Lugar(models.Model):
 
 class Actividad(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre")
-    tipo = models.ForeignKey(Lugar, blank=True, null=True, verbose_name="Tipo de actividad")
+    tipo = models.ForeignKey(TipoActividad, blank=True, null=True, verbose_name="Tipo de actividad")
     lugar = models.ForeignKey(Lugar, blank=True, null=True)
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     costo = models.CharField(max_length=100)
@@ -57,6 +57,7 @@ class Actividad(models.Model):
 
 
 class InscripcionBase(models.Model):
+    puesto = models.PositiveIntegerField()
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
     cedula = models.CharField(max_length=30)
