@@ -67,6 +67,23 @@ def info_inscripto(request):
     return render_to_response('form.html', context,
                               context_instance=RequestContext(request))
 
+def lista_inscriptos(request):
+    m = request.GET.get('m')
+    text = request.GET.get('text')
+    actividad_id = decode_data(m, text)
+    actividad = get_object_or_404(Actividad, pk=actividad_id)
+    form_entry = actividad.formDinamico
+
+    form_element_entries = form_entry.formelemententry_set.all()[:]
+
+    lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
+    context = {'lista_inscriptos': lista_inscriptos,
+               'actividad': actividad,
+               'entries': form_element_entries,
+               }
+    return render_to_response('inscriptos.html', context,
+                              context_instance=RequestContext(request))
+
 
 def form(request, form_entry_slug, theme=None, template_name=None):
     """
@@ -201,6 +218,7 @@ def inscripcion_extra(request):
     form_entry = inscripto.actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
+    print(form_element_entries)
     # This is where the most of the magic happens. Our form is being built
     # dynamically.
     FormClass = assemble_form_class(
@@ -208,7 +226,6 @@ def inscripcion_extra(request):
         form_element_entries = form_element_entries,
         request = request
     )
-
     if 'POST' == request.method:
         form = FormClass(request.POST, request.FILES)
 

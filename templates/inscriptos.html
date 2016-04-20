@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block contenido %}
+
+
+
+{# Display django.contrib.messages as Bootstrap alerts #}
+    <div class="row">
+        <div class="col-sm-12 ">
+            <h1>Lista de inscriptos a la actividad: {{ actividad }}</h1>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 ">
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Puesto</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>CI</th>
+                            <th>Telefono</th>
+                            <th>Mail</th>
+                            {% for entry in entries %}
+                                <th>{{ entry. }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
