@@ -31,7 +31,7 @@ urlpatterns = [
 
     # View form entry
     url(r'^view/(?P<form_entry_slug>[\w_\-]+)/$',
-        'inscripcion.views.view_form_entry',
+        'fobi.views.view_form_entry',
         name='fobi.view_form_entry'),
 
     url(r'^$', views.ActividadList.as_view(), name='inicio'),
@@ -39,7 +39,10 @@ urlpatterns = [
     url(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', 'inscripcion.views.form'),
 
     url(r'^actividad/(?P<idActividad>\d+)/$', 'inscripcion.views.inscripcion_actividad'),
+    url(r'^lista/(?P<idActividad>\d+)/$', 'inscripcion.views.lista_actividad'),
     url(r'^inscripto/$', 'inscripcion.views.inscripcion_extra'),
     url(r'^info/(?P<idInscripto>\d+)/$', 'inscripcion.views.info_inscripto'),
     url(r'^info2/$', 'inscripcion.views.info_inscripto'),
+    url(r'^inscriptos/$', 'inscripcion.views.lista_inscriptos'),
+
 ]

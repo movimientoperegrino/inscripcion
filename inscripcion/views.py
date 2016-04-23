@@ -67,6 +67,33 @@ def info_inscripto(request):
     return render_to_response('form.html', context,
                               context_instance=RequestContext(request))
 
+
+def lista_actividad(request, idActividad):
+    actividad = get_object_or_404(Actividad, pk=idActividad)
+    # print actividad
+    # m, txt = encode_data(idActividad)
+    # print m
+    # print txt
+    # url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + m + '&text=' + txt
+    # return HttpResponseRedirect(url_info)
+    form_entry = actividad.formDinamico
+
+    form_element_entries = form_entry.formelemententry_set.all()[:]
+
+    lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
+    for inscripto in lista_inscriptos:
+        if inscripto.datos != "":
+            inscripto.datos = json.loads(inscripto.datos)
+
+    context = {'lista_inscriptos': lista_inscriptos,
+               'actividad': actividad,
+               'entries': form_element_entries,
+               }
+    return render_to_response('inscriptos.html', context,
+                              context_instance=RequestContext(request))
+
+
+
 def lista_inscriptos(request):
     m = request.GET.get('m')
     text = request.GET.get('text')
@@ -77,6 +104,8 @@ def lista_inscriptos(request):
     form_element_entries = form_entry.formelemententry_set.all()[:]
 
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
+    for inscripto in lista_inscriptos:
+        inscripto.datos = json.dump(inscripto.datos)
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
                'entries': form_element_entries,
@@ -277,129 +306,129 @@ def inscripcion_extra(request):
     return render_to_response('formextra.html', context,
                               context_instance=RequestContext(request))
 
-def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
-    """
-    View create form.
-
-    :param django.http.HttpRequest request:
-    :param string form_entry_slug:
-    :param fobi.base.BaseTheme theme: Theme instance.
-    :param string template_name:
-    :return django.http.HttpResponse:
-    """
-    try:
-        kwargs = {'slug': form_entry_slug}
-        if not request.user.is_authenticated():
-            kwargs.update({'is_public': True})
-        form_entry = FormEntry._default_manager.select_related('user') \
-                              .get(**kwargs)
-    except ObjectDoesNotExist as err:
-        raise Http404(ugettext("Form entry not found."))
-
-    form_element_entries = form_entry.formelemententry_set.all()[:]
-
-    # This is where the most of the magic happens. Our form is being built
-    # dynamically.
-    FormClass = assemble_form_class(
-        form_entry,
-        form_element_entries = form_element_entries,
-        request = request
-    )
-
-    if 'POST' == request.method:
-        form = FormClass(request.POST, request.FILES)
-
-        # Fire pre form validation callbacks
-        fire_form_callbacks(form_entry=form_entry, request=request, form=form,
-                            stage=CALLBACK_BEFORE_FORM_VALIDATION)
-
-        if form.is_valid():
-            # Fire form valid callbacks, before handling submitted plugin
-            # form data.
-            form = fire_form_callbacks(
-                form_entry = form_entry,
-                request = request,
-                form = form,
-                stage = CALLBACK_FORM_VALID_BEFORE_SUBMIT_PLUGIN_FORM_DATA
-            )
-
-            # Fire plugin processors
-            form = submit_plugin_form_data(form_entry=form_entry,
-                                           request=request, form=form)
-
-            # Fire form valid callbacks
-            form = fire_form_callbacks(form_entry=form_entry,
-                                       request=request, form=form,
-                                       stage=CALLBACK_FORM_VALID)
-
-            # Run all handlers
-            handler_responses, handler_errors = run_form_handlers(
-                form_entry = form_entry,
-                request = request,
-                form = form,
-                form_element_entries = form_element_entries
-            )
-
-            # Warning that not everything went ok.
-            if handler_errors:
-                for handler_error in handler_errors:
-                    messages.warning(
-                        request,
-                        _("Error occured: {0}."
-                          "").format(handler_error)
-                    )
-
-            # Fire post handler callbacks
-            fire_form_callbacks(
-                form_entry = form_entry,
-                request = request,
-                form = form,
-                stage = CALLBACK_FORM_VALID_AFTER_FORM_HANDLERS
-                )
-
-            messages.info(
-                request,
-                _("Form {0} was submitted successfully."
-                  "").format(form_entry.name)
-            )
-            return redirect(
-                reverse('fobi.form_entry_submitted', args=[form_entry.slug])
-            )
-        else:
-            # Fire post form validation callbacks
-            fire_form_callbacks(form_entry=form_entry, request=request,
-                                form=form, stage=CALLBACK_FORM_INVALID)
-
-    else:
-        # Providing initial form data by feeding entire GET dictionary
-        # to the form, if ``GET_PARAM_INITIAL_DATA`` is present in the
-        # GET.
-        kwargs = {}
-        if GET_PARAM_INITIAL_DATA in request.GET:
-            kwargs = {'initial': request.GET}
-        form = FormClass(**kwargs)
-
-    # In debug mode, try to identify possible problems.
-    if DEBUG:
-        try:
-            form.as_p()
-        except Exception as err:
-            logger.error(err)
-
-    theme = get_theme(request=request, as_instance=True)
-    theme.collect_plugin_media(form_element_entries)
-
-    context = {
-        'form': form,
-        'form_entry': form_entry,
-        'fobi_theme': theme,
-    }
-
-    if not template_name:
-        template_name = theme.view_form_entry_template
-
-    return render_to_response(template_name, context,
-                              context_instance=RequestContext(request))
+# def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
+#     """
+#     View create form.
+#
+#     :param django.http.HttpRequest request:
+#     :param string form_entry_slug:
+#     :param fobi.base.BaseTheme theme: Theme instance.
+#     :param string template_name:
+#     :return django.http.HttpResponse:
+#     """
+#     try:
+#         kwargs = {'slug': form_entry_slug}
+#         if not request.user.is_authenticated():
+#             kwargs.update({'is_public': True})
+#         form_entry = FormEntry._default_manager.select_related('user') \
+#                               .get(**kwargs)
+#     except ObjectDoesNotExist as err:
+#         raise Http404(ugettext("Form entry not found."))
+#
+#     form_element_entries = form_entry.formelemententry_set.all()[:]
+#
+#     # This is where the most of the magic happens. Our form is being built
+#     # dynamically.
+#     FormClass = assemble_form_class(
+#         form_entry,
+#         form_element_entries = form_element_entries,
+#         request = request
+#     )
+#
+#     if 'POST' == request.method:
+#         form = FormClass(request.POST, request.FILES)
+#
+#         # Fire pre form validation callbacks
+#         fire_form_callbacks(form_entry=form_entry, request=request, form=form,
+#                             stage=CALLBACK_BEFORE_FORM_VALIDATION)
+#
+#         if form.is_valid():
+#             # Fire form valid callbacks, before handling submitted plugin
+#             # form data.
+#             form = fire_form_callbacks(
+#                 form_entry = form_entry,
+#                 request = request,
+#                 form = form,
+#                 stage = CALLBACK_FORM_VALID_BEFORE_SUBMIT_PLUGIN_FORM_DATA
+#             )
+#
+#             # Fire plugin processors
+#             form = submit_plugin_form_data(form_entry=form_entry,
+#                                            request=request, form=form)
+#
+#             # Fire form valid callbacks
+#             form = fire_form_callbacks(form_entry=form_entry,
+#                                        request=request, form=form,
+#                                        stage=CALLBACK_FORM_VALID)
+#
+#             # Run all handlers
+#             handler_responses, handler_errors = run_form_handlers(
+#                 form_entry = form_entry,
+#                 request = request,
+#                 form = form,
+#                 form_element_entries = form_element_entries
+#             )
+#
+#             # Warning that not everything went ok.
+#             if handler_errors:
+#                 for handler_error in handler_errors:
+#                     messages.warning(
+#                         request,
+#                         _("Error occured: {0}."
+#                           "").format(handler_error)
+#                     )
+#
+#             # Fire post handler callbacks
+#             fire_form_callbacks(
+#                 form_entry = form_entry,
+#                 request = request,
+#                 form = form,
+#                 stage = CALLBACK_FORM_VALID_AFTER_FORM_HANDLERS
+#                 )
+#
+#             messages.info(
+#                 request,
+#                 _("Form {0} was submitted successfully."
+#                   "").format(form_entry.name)
+#             )
+#             return redirect(
+#                 reverse('fobi.form_entry_submitted', args=[form_entry.slug])
+#             )
+#         else:
+#             # Fire post form validation callbacks
+#             fire_form_callbacks(form_entry=form_entry, request=request,
+#                                 form=form, stage=CALLBACK_FORM_INVALID)
+#
+#     else:
+#         # Providing initial form data by feeding entire GET dictionary
+#         # to the form, if ``GET_PARAM_INITIAL_DATA`` is present in the
+#         # GET.
+#         kwargs = {}
+#         if GET_PARAM_INITIAL_DATA in request.GET:
+#             kwargs = {'initial': request.GET}
+#         form = FormClass(**kwargs)
+#
+#     # In debug mode, try to identify possible problems.
+#     if DEBUG:
+#         try:
+#             form.as_p()
+#         except Exception as err:
+#             logger.error(err)
+#
+#     theme = get_theme(request=request, as_instance=True)
+#     theme.collect_plugin_media(form_element_entries)
+#
+#     context = {
+#         'form': form,
+#         'form_entry': form_entry,
+#         'fobi_theme': theme,
+#     }
+#
+#     if not template_name:
+#         template_name = theme.view_form_entry_template
+#
+#     return render_to_response(template_name, context,
+#                               context_instance=RequestContext(request))
 
 
 from django.conf import settings

@@ -2,8 +2,8 @@
 {% block contenido %}
 
 
-
-{# Display django.contrib.messages as Bootstrap alerts #}
+    {% load filters %}
+    {# Display django.contrib.messages as Bootstrap alerts #}
     <div class="row">
         <div class="col-sm-12 ">
             <h1>Lista de inscriptos a la actividad: {{ actividad }}</h1>
@@ -13,20 +13,36 @@
     <div class="row">
         <div class="col-sm-12 ">
             <div>
-                <table>
+                <table class="table">
                     <thead>
+                    <tr>
+                        <th>Puesto</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>CI</th>
+                        <th>Telefono</th>
+                        <th>Mail</th>
+
+                        {% for dato in lista_inscriptos.first.datos %}
+                            <th>{{ dato }}</th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for inscripto in lista_inscriptos %}
                         <tr>
-                            <th>Puesto</th>
-                            <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>CI</th>
-                            <th>Telefono</th>
-                            <th>Mail</th>
-                            {% for entry in entries %}
-                                <th>{{ entry. }}</th>
+                            <td>{{ inscripto.puesto }}</td>
+                            <td>{{ inscripto.nombre }}</td>
+                            <td>{{ inscripto.apellido }}</td>
+                            <td>{{ inscripto.cedula }}</td>
+                            <td>{{ inscripto.celular }}</td>
+                            <td>{{ inscripto.mail }}</td>
+                            {% for dato in inscripto.datos %}
+                                <td>{{ inscripto.datos|get_item:dato }}</td>
                             {% endfor %}
                         </tr>
-                    </thead>
+                    {% endfor %}
+                    </tbody>
                 </table>
             </div>
         </div>
