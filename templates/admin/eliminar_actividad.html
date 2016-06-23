@@ -1,0 +1,14 @@
+{% extends 'admin/actividad_list.html' %}
+{% block contenido %}
+    <div class="row">
+        <div class="col-sm-12 ">
+            <h2>Eliminar actividad: {{ actividad }}</h2>
+
+        </div>
+    </div>
+    <div class="alert alert-danger" role="alert">
+        Desea elimininar la actividad: {{ actividad }}?
+    </div>
+    <a class="btn btn-default" href="/actividades/{{ actividad.id }}/eliminada">Si</a>
+    <a class="btn btn-default" href="/actividades">No</a>
+{% endblock %}

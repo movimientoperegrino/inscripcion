@@ -23,3 +23,9 @@ class InscriptoInfo(forms.ModelForm):
         model = InscripcionBase
         exclude = ['id']
 
+
+class ActividadForm(forms.ModelForm):
+    class Meta:
+        model = Actividad
+        exclude = ['id']
+

@@ -55,6 +55,10 @@ from fobi.utils import (
 from fobi.helpers import JSONDataExporter
 from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
 import csv
+from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.forms import AuthenticationForm
+
+
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +73,113 @@ def info_inscripto(request):
                               context_instance=RequestContext(request))
 
 
-def lista_actividad(request, idActividad):
+
+def iniciar_sesion(request):
+    mensaje =""
+    if not request.user.is_anonymous():
+        return HttpResponseRedirect('/actividades')
+    if request.method == 'POST':
+        form = AuthenticationForm(request.POST)
+        if form.is_valid:
+            usuario = request.POST['username']
+            clave = request.POST['password']
+            acceso = authenticate(username=usuario, password=clave)
+            if acceso is not None:
+                if acceso.is_active:
+                    login(request, acceso)
+                    return lista_actividades(request)
+            else:
+                mensaje = "Credenciales incorrectas"
+
+    else:
+        form = AuthenticationForm()
+    return render_to_response('admin/login.html', {'form': form, 'mensaje': mensaje},
+                              context_instance=RequestContext(request))
+
+def cerrar_sesion(request):
+    logout(request)
+    return HttpResponseRedirect('/login')
+
+@login_required(login_url='/login')
+def lista_actividades(request):
+    actividades = Actividad.objects.all().order_by('fechaApertura').reverse()
+    return render_to_response(
+        'admin/actividad_list.html',
+        {'lista_actividades': actividades},
+        context_instance=RequestContext(request)
+    )
+
+
+
+@login_required(login_url='/login')
+def nueva_actividad(request):
+    if request.method == 'POST':
+        form = ActividadForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/login')
+    else:
+        form = ActividadForm()
+
+    titulo = 'Nueva actividad'
+    return render_to_response(
+        'admin/form.html',
+        {'form': form, 'titulo': titulo},
+        context_instance=RequestContext(request)
+    )
+
+@login_required(login_url='/login')
+def editar_actividad(request, id_actividad):
+    try:
+        actividad = Actividad.objects.get(pk=id_actividad)
+    except Actividad.DoesNotExist:
+        raise Http404
+    if request.method == 'POST':
+        form = ActividadForm(request.POST, instance=actividad)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/actividades')
+
+    else:
+        form = ActividadForm(instance=actividad)
+
+    titulo = 'Editar actividad: ' + actividad.nombre
+    return render_to_response(
+        'admin/form.html',
+        {'form': form, 'titulo': titulo},
+        context_instance=RequestContext(request)
+    )
+
+@login_required(login_url='/login')
+def eliminar_actividad(request, id_actividad):
+    try:
+        actividad = Actividad.objects.get(pk=id_actividad)
+    except Actividad.DoesNotExist:
+        raise Http404
+    return render_to_response(
+        'admin/eliminar_actividad.html',
+        {'actividad': actividad},
+        context_instance=RequestContext(request)
+    )
+
+@login_required(login_url='/login')
+def actividad_eliminada(request, id_actividad):
+    try:
+        actividad = Actividad.objects.get(pk=id_actividad)
+    except Actividad.DoesNotExist:
+        raise Http404
+    mensaje = "La actividad " + actividad.nombre + " ha sido eliminada con exito."
+    actividad.delete()
+    actividades = Actividad.objects.all().order_by('fechaApertura').reverse()
+    return render_to_response(
+        'admin/actividad_list.html',
+        {'mensaje': mensaje, 'lista_actividades': actividades},
+        context_instance=RequestContext(request)
+    )
+
+@login_required(login_url='/login')
+def inscriptos_actividad(request, idActividad):
     actividad = get_object_or_404(Actividad, pk=idActividad)
     # print actividad
     # m, txt = encode_data(idActividad)
@@ -80,19 +190,30 @@ def lista_actividad(request, idActividad):
     form_entry = actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
-
+    cabecera = []
+    jsontitles=[]
+    for entry in form_element_entries:
+        aux = json.loads(entry.plugin_data)
+        cabecera.append(aux["label"])
+        jsontitles.append(aux["name"])
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
     for inscripto in lista_inscriptos:
-        if inscripto.datos != "":
+        if inscripto.datos != None:
             inscripto.datos = json.loads(inscripto.datos)
+    m, txt = encode_data(actividad.id)
 
+
+    url_contacto = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + m + '&text=' + txt
+    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + m + '&text=' + txt
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
-               'entries': form_element_entries,
+               'cabecera': cabecera,
+               'jsontitles': jsontitles,
+               'url_contacto': url_contacto,
+               'url_csv': url_csv,
                }
-    return render_to_response('inscriptos.html', context,
+    return render_to_response('admin/inscriptos.html', context,
                               context_instance=RequestContext(request))
-
 
 
 def lista_inscriptos(request):
@@ -103,20 +224,33 @@ def lista_inscriptos(request):
     form_entry = actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
-
+    cabecera = []
+    jsontitles=[]
+    for entry in form_element_entries:
+        aux = json.loads(entry.plugin_data)
+        cabecera.append(aux["label"])
+        jsontitles.append(aux["name"])
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
     for inscripto in lista_inscriptos:
-        inscripto.datos = json.dump(inscripto.datos)
+        if inscripto.datos != None:
+            inscripto.datos = json.loads(inscripto.datos)
+
+    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + m + '&text=' + text
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
-               'entries': form_element_entries,
+               'cabecera': cabecera,
+               'jsontitles': jsontitles,
+               'url_csv': url_csv,
                }
     return render_to_response('inscriptos.html', context,
                               context_instance=RequestContext(request))
 
 
-def descargar_csv(request, idActividad):
-    actividad = get_object_or_404(Actividad, pk=idActividad)
+def descargar_csv(request):
+    m = request.GET.get('m')
+    text = request.GET.get('text')
+    actividad_id = decode_data(m, text)
+    actividad = get_object_or_404(Actividad, pk=actividad_id)
     # print actividad
     # m, txt = encode_data(idActividad)
     # print m
@@ -129,7 +263,7 @@ def descargar_csv(request, idActividad):
 
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
     for inscripto in lista_inscriptos:
-        if inscripto.datos != "":
+        if inscripto.datos != None:
             inscripto.datos = json.loads(inscripto.datos)
 
     response = HttpResponse(content_type='text/csv')
@@ -137,14 +271,20 @@ def descargar_csv(request, idActividad):
 
     writer = csv.writer(response, delimiter=';')
     row = ['Puesto', 'Nombre', 'Apellido', 'Cedula', 'Telefono', 'Email']
-    for aux in lista_inscriptos.first().datos:
-        row.append(aux)
+    jsontitles=[]
+    for entry in form_element_entries:
+        aux = json.loads(entry.plugin_data)
+        jsontitles.append(aux["name"])
+        row.append(aux["label"])
     writer.writerow(row)
 
     for inscripto in lista_inscriptos:
         row = [inscripto.puesto, inscripto.nombre, inscripto.apellido, inscripto.cedula, inscripto.cedula, inscripto.mail]
-        for dato in inscripto.datos:
-            row.append(inscripto.datos[dato])
+        for dato in jsontitles:
+            try:
+                row.append(inscripto.datos[dato])
+            except:
+                row.append("")
 
         writer.writerow(row)
 
@@ -210,7 +350,11 @@ def inscripcion_actividad(request, idActividad):
         mensaje = 'La inscripcion a la actividad: "' + actividad.nombre + '" ha finalizado.'
         mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
-        return HttpResponse(mensaje)
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
 
     #se controla la cantidad de inscriptos
     cantidadPermitida = actividad.cantidadSuplentes + actividad.cantidadTitulares
@@ -221,12 +365,20 @@ def inscripcion_actividad(request, idActividad):
         mensaje = 'El cupo  para "' + actividad.nombre + '" se encuentra lleno.'
         mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
-        return HttpResponse(mensaje)
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
 
     #se controla la fecha/hora de activacion
     if timezone.now() < actividad.fechaApertura:
         mensaje = 'La inscripcion a  la actividad "' + actividad.nombre + '" aun no se encuentra habilitada'
-        return HttpResponse(mensaje)
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
     else:
         if actividad.estado == Actividad.INACTIVO:
             actividad.estado = Actividad.ACTIVO
@@ -252,7 +404,11 @@ def inscripcion_actividad(request, idActividad):
             if ciBoolean == True:
                 suceso = False
                 mensaje = 'ERROR: Usted ya se ha inscripto a esta actividad con esa cedula'
-                return HttpResponse(mensaje)
+                return render_to_response(
+                    'error.html',
+                    {'mensaje': mensaje},
+                    context_instance=RequestContext(request)
+        )
             inscripto = form.save()
 
             m, txt = encode_data(inscripto.id)
@@ -281,6 +437,13 @@ def inscripcion_extra(request):
     text = request.GET.get('text')
     idInscripto = decode_data(m, text)
     inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
+    if(inscripto.datos != None):
+        mensaje = 'Usted ya ha completado los datos extra.'
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
     form_entry = inscripto.actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
@@ -307,14 +470,12 @@ def inscripcion_extra(request):
             inscripto.datos = json.dumps(cleaned_data)
             inscripto.save()
 
-            messages.info(
-                request,
-                _("Form {0} was submitted successfully."
-                  "").format(form_entry.name)
-            )
-            return redirect(
-                reverse('fobi.form_entry_submitted', args=[form_entry.slug])
-            )
+            mensaje = 'Su solicitud ha sido procesada con exito. Gracias por inscribirse'
+            return render_to_response(
+                'suceso.html',
+                {'mensaje': mensaje},
+                context_instance=RequestContext(request)
+        )
 
 
     else:

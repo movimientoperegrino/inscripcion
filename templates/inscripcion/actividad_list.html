@@ -9,10 +9,33 @@
             <div class="panel panel-default">
                 <div class="panel-heading"><h4>{{ tipo.grouper }}</h4></div>
                 <div class="panel-body">
+                    <ul class="list-group">
                     {% for i in tipo.list %}
+                        <li class="list-group-item">
+                            <h3>{{ i.nombre }}</h3>
+                            <dl class="dl-horizontal">
+                                <dt>Fecha de Inicio</dt>
+                                <dd>{{ i.fechaInicio }}</dd>
+                                <dt>Fecha de Finalización</dt>
+                                <dd>{{ i.fechaFin }}</dd>
+                                <dt>Lugar</dt>
+                                <dd><a href="{{ i.lugar.url }}">{{ i.lugar }}</a></dd>
+                                <dt>Direccion</dt>
+                                <dd>{{ i.lugar.direccion }}</dd>
+                                <dt>Costo</dt>
+                                <dd>{{ i.costo }}</dd>
+                                <dt>Fecha de apertura:</dt>
+                                <dd>{{ i.fechaApertura }}</dd>
+                                <dt>Fecha de cierre:</dt>
+                                <dd>{{ i.fechaCierre }}</dd>
+                                 <dt>Requisitos:</dt>
+                                <dd>{{ i.requisitos }}</dd>
+                            </dl>
+                        <a href="{% url 'inscripcion.views.inscripcion_actividad' i.id %}" class="btn btn-default">Inscribirse</a>
+                        </li>
 
-                        <p>{{ i.nombre }} - {{ i.fechaInicio }}</p>
                     {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>

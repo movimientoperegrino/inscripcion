@@ -39,11 +39,18 @@ urlpatterns = [
     url(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', 'inscripcion.views.form'),
 
     url(r'^actividad/(?P<idActividad>\d+)/$', 'inscripcion.views.inscripcion_actividad'),
-    url(r'^lista/(?P<idActividad>\d+)/$', 'inscripcion.views.lista_actividad'),
-    url(r'^csv/(?P<idActividad>\d+)/$', 'inscripcion.views.descargar_csv'),
+    url(r'^lista/(?P<idActividad>\d+)/$', 'inscripcion.views.inscriptos_actividad'),
+    url(r'^csv/$', 'inscripcion.views.descargar_csv'),
     url(r'^inscripto/$', 'inscripcion.views.inscripcion_extra'),
     url(r'^info/(?P<idInscripto>\d+)/$', 'inscripcion.views.info_inscripto'),
     url(r'^info2/$', 'inscripcion.views.info_inscripto'),
     url(r'^inscriptos/$', 'inscripcion.views.lista_inscriptos'),
+    url(r'^actividades/$', 'inscripcion.views.lista_actividades'),
+    url(r'^actividades/nueva$', 'inscripcion.views.nueva_actividad'),
+    url(r'^actividades/(?P<id_actividad>\d+)/editar/$', 'inscripcion.views.editar_actividad'),
+    url(r'^actividades/(?P<id_actividad>\d+)/eliminar/$', 'inscripcion.views.eliminar_actividad'),
+    url(r'^actividades/(?P<id_actividad>\d+)/eliminada/$', 'inscripcion.views.actividad_eliminada'),
+    url(r'^logout/$', 'inscripcion.views.cerrar_sesion'),
+    url(r'^login/$', 'inscripcion.views.iniciar_sesion'),
 
 ]
