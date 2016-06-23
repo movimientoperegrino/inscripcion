@@ -39,9 +39,15 @@
                             <td>{{ inscripto.cedula }}</td>
                             <td>{{ inscripto.celular }}</td>
                             <td>{{ inscripto.mail }}</td>
-                            {% for dato in jsontitles %}
-                                <td>{{ inscripto.datos|get_item:dato }}</td>
-                            {% endfor %}
+                            {% if inscripto.datos == None %}
+                                {% for dato in cabecera %}
+                                    <td>None</td>
+                                {% endfor %}
+                            {% else %}
+                                {% for dato in jsontitles %}
+                                    <td>{{ inscripto.datos|get_item:dato }}</td>
+                                {% endfor %}
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
