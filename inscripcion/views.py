@@ -54,6 +54,7 @@ from fobi.utils import (
 )
 from fobi.helpers import JSONDataExporter
 from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
+import csv
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,42 @@ def lista_inscriptos(request):
                }
     return render_to_response('inscriptos.html', context,
                               context_instance=RequestContext(request))
+
+
+def descargar_csv(request, idActividad):
+    actividad = get_object_or_404(Actividad, pk=idActividad)
+    # print actividad
+    # m, txt = encode_data(idActividad)
+    # print m
+    # print txt
+    # url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + m + '&text=' + txt
+    # return HttpResponseRedirect(url_info)
+    form_entry = actividad.formDinamico
+
+    form_element_entries = form_entry.formelemententry_set.all()[:]
+
+    lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
+    for inscripto in lista_inscriptos:
+        if inscripto.datos != "":
+            inscripto.datos = json.loads(inscripto.datos)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="inscriptos.csv"'
+
+    writer = csv.writer(response, delimiter=';')
+    row = ['Puesto', 'Nombre', 'Apellido', 'Cedula', 'Telefono', 'Email']
+    for aux in lista_inscriptos.first().datos:
+        row.append(aux)
+    writer.writerow(row)
+
+    for inscripto in lista_inscriptos:
+        row = [inscripto.puesto, inscripto.nombre, inscripto.apellido, inscripto.cedula, inscripto.cedula, inscripto.mail]
+        for dato in inscripto.datos:
+            row.append(inscripto.datos[dato])
+
+        writer.writerow(row)
+
+    return response
 
 
 def form(request, form_entry_slug, theme=None, template_name=None):
