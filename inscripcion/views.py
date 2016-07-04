@@ -371,6 +371,20 @@ def inscripcion_actividad(request, idActividad):
             context_instance=RequestContext(request)
         )
 
+    # se controla la fecha/hora de cierre
+    if timezone.now() > actividad.fechaCierre:
+        mensaje = 'La inscripcion a la actividad: "' + actividad.nombre + '" ha finalizado.'
+        mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
+        mensaje += actividad.emailContacto
+        if actividad.estado != actividad.FINALIZADO:
+            actividad.estado = actividad.FINALIZADO
+            actividad.save()
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
+
     #se controla la fecha/hora de activacion
     if timezone.now() < actividad.fechaApertura:
         mensaje = 'La inscripcion a  la actividad "' + actividad.nombre + '" aun no se encuentra habilitada'
