@@ -18,7 +18,7 @@
             <form id="formulario" method="post" action="" class="form">{% csrf_token %}
                 {% bootstrap_form form layout='horizontal' %}
                 {% buttons %}
-                <button type="submit" class="btn btn-primary">
+                <button id="save" type="submit" class="btn btn-primary">
                     {% bootstrap_icon "floppy-disk" %} Guardar
                 </button>
                 {% endbuttons %}
