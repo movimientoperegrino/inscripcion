@@ -1,4 +1,5 @@
-#encoding=utf8
+# -*- coding: utf-8 -*-
+
 from django.shortcuts import render
 
 # Create your views here.
@@ -720,4 +721,10 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
 class ActividadList(ListView):
-    queryset = Actividad.objects.all().order_by("tipo_id", "fechaInicio")
+    actividades = Actividad.objects.all().order_by("tipo_id", "fechaApertura")
+    #Muestra las actividades que se van a habilitar en 15 dias o menos
+    fechaApertura = timezone.now() + timedelta(days=16)
+    # Muestra las actividades que no finalizaron aun
+    fechafin = timezone.now() - timedelta(days=1)
+    actividades = actividades.filter(fechaFin__gte=fechafin).filter(fechaApertura__lte=fechaApertura)
+    queryset = actividades

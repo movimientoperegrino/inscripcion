@@ -60,7 +60,7 @@ class InscripcionBase(models.Model):
     puesto = models.PositiveIntegerField()
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    cedula = models.CharField(max_length=30)
+    cedula = models.CharField(max_length=30, verbose_name="Cédula")
     celular = models.CharField(max_length=30)
     mail = models.EmailField()
     datos = models.TextField(null=True,blank=True)

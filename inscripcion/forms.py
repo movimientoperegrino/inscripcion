@@ -1,9 +1,11 @@
 __author__ = 'juanfranfv'
+# -*- coding: utf-8 -*-
+
 from django import forms
 from models import *
 
 class InscripcionBaseForm(forms.ModelForm):
-    confirmacion_mail = forms.EmailField()
+    confirmacion_mail = forms.EmailField(label="Confirmación del mail")
     class Meta:
         model = InscripcionBase
         exclude = ['datos','actividad','puesto']
