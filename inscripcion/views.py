@@ -418,7 +418,7 @@ def inscripcion_actividad(request, idActividad):
 
             if ciBoolean == True:
                 suceso = False
-                mensaje = 'ERROR: Usted ya se ha inscripto a esta actividad con esa cedula'
+                mensaje = 'Usted ya se ha inscripto a esta actividad con esa cedula'
                 return render_to_response(
                     'error.html',
                     {'mensaje': mensaje},
