@@ -42,8 +42,6 @@ urlpatterns = [
     url(r'^lista/(?P<idActividad>\d+)/$', 'inscripcion.views.inscriptos_actividad'),
     url(r'^csv/$', 'inscripcion.views.descargar_csv'),
     url(r'^inscripto/$', 'inscripcion.views.inscripcion_extra'),
-    url(r'^info/(?P<idInscripto>\d+)/$', 'inscripcion.views.info_inscripto'),
-    url(r'^info2/$', 'inscripcion.views.info_inscripto'),
     url(r'^inscriptos/$', 'inscripcion.views.lista_inscriptos'),
     url(r'^actividades/$', 'inscripcion.views.lista_actividades'),
     url(r'^actividades/nueva$', 'inscripcion.views.nueva_actividad'),

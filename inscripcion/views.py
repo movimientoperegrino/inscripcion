@@ -58,6 +58,7 @@ from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
 import csv
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.utils.encoding import smart_unicode
 
 
 
@@ -90,7 +91,7 @@ def iniciar_sesion(request):
                     login(request, acceso)
                     return lista_actividades(request)
             else:
-                mensaje = "Credenciales incorrectas"
+                mensaje = u"Credenciales incorrectas"
 
     else:
         form = AuthenticationForm()
@@ -170,7 +171,7 @@ def actividad_eliminada(request, id_actividad):
         actividad = Actividad.objects.get(pk=id_actividad)
     except Actividad.DoesNotExist:
         raise Http404
-    mensaje = "La actividad " + actividad.nombre + " ha sido eliminada con exito."
+    mensaje = u"La actividad " + actividad.nombre + " ha sido eliminada con éxito."
     actividad.delete()
     actividades = Actividad.objects.all().order_by('fechaApertura').reverse()
     return render_to_response(
@@ -220,7 +221,15 @@ def inscriptos_actividad(request, idActividad):
 def lista_inscriptos(request):
     m = request.GET.get('m')
     text = request.GET.get('text')
-    actividad_id = decode_data(m, text)
+    try:
+        actividad_id = decode_data(m, text)
+    except:
+        mensaje = u'La url no es correcta.'
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
     actividad = get_object_or_404(Actividad, pk=actividad_id)
     form_entry = actividad.formDinamico
 
@@ -250,7 +259,15 @@ def lista_inscriptos(request):
 def descargar_csv(request):
     m = request.GET.get('m')
     text = request.GET.get('text')
-    actividad_id = decode_data(m, text)
+    try:
+        actividad_id = decode_data(m, text)
+    except:
+        mensaje = u'La url no es correcta.'
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
     actividad = get_object_or_404(Actividad, pk=actividad_id)
     # print actividad
     # m, txt = encode_data(idActividad)
@@ -348,8 +365,8 @@ def inscripcion_actividad(request, idActividad):
 
     #si el estado de la actividad es finalizado, termina la inscripcion
     if actividad.estado == Actividad.FINALIZADO:
-        mensaje = 'La inscripcion a la actividad: "' + actividad.nombre + '" ha finalizado.'
-        mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
+        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + '" ha finalizado.'
+        mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
         return render_to_response(
             'error.html',
@@ -363,8 +380,8 @@ def inscripcion_actividad(request, idActividad):
     if cantidadInscriptos >= cantidadPermitida:
         actividad.estado = actividad.FINALIZADO
         actividad.save()
-        mensaje = 'El cupo  para "' + actividad.nombre + '" se encuentra lleno.'
-        mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
+        mensaje = u'El cupo  para "' + actividad.nombre + '" se encuentra lleno.'
+        mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
         return render_to_response(
             'error.html',
@@ -374,8 +391,8 @@ def inscripcion_actividad(request, idActividad):
 
     # se controla la fecha/hora de cierre
     if timezone.now() > actividad.fechaCierre:
-        mensaje = 'La inscripcion a la actividad: "' + actividad.nombre + '" ha finalizado.'
-        mensaje += ' Si tiene alguna consulta, comuniquese con el encargado de inscripciones al correo: '
+        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + '" ha finalizado.'
+        mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
         if actividad.estado != actividad.FINALIZADO:
             actividad.estado = actividad.FINALIZADO
@@ -388,7 +405,7 @@ def inscripcion_actividad(request, idActividad):
 
     #se controla la fecha/hora de activacion
     if timezone.now() < actividad.fechaApertura:
-        mensaje = 'La inscripcion a  la actividad "' + actividad.nombre + '" aun no se encuentra habilitada'
+        mensaje = u'La inscripción a  la actividad "' + actividad.nombre + '" aún no se encuentra habilitada'
         return render_to_response(
             'error.html',
             {'mensaje': mensaje},
@@ -418,7 +435,7 @@ def inscripcion_actividad(request, idActividad):
 
             if ciBoolean == True:
                 suceso = False
-                mensaje = 'Usted ya se ha inscripto a esta actividad con esa cedula'
+                mensaje = u'Usted ya se ha inscripto a esta actividad con esa cédula'
                 return render_to_response(
                     'error.html',
                     {'mensaje': mensaje},
@@ -450,10 +467,18 @@ def inscripcion_actividad(request, idActividad):
 def inscripcion_extra(request):
     m = request.GET.get('m')
     text = request.GET.get('text')
-    idInscripto = decode_data(m, text)
+    try:
+        idInscripto = decode_data(m, text)
+    except:
+        mensaje = u'La url no es correcta.'
+        return render_to_response(
+            'error.html',
+            {'mensaje': mensaje},
+            context_instance=RequestContext(request)
+        )
     inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
     if(inscripto.datos != None):
-        mensaje = 'Usted ya ha completado los datos extra.'
+        mensaje = u'Usted ya ha completado los datos extra.'
         return render_to_response(
             'error.html',
             {'mensaje': mensaje},
@@ -485,7 +510,7 @@ def inscripcion_extra(request):
             inscripto.datos = json.dumps(cleaned_data)
             inscripto.save()
 
-            mensaje = 'Su solicitud ha sido procesada con exito. Gracias por inscribirse'
+            mensaje = u'Su solicitud ha sido procesada con éxito. Gracias por inscribirse'
             return render_to_response(
                 'suceso.html',
                 {'mensaje': mensaje},
