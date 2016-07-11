@@ -1,6 +1,7 @@
 #encoding=utf8
 from django.db import models
 from fobi.models import FormEntry
+from django.utils import timezone
 # Create your models here.
 
 class Parametro(models.Model):
@@ -63,8 +64,9 @@ class InscripcionBase(models.Model):
     cedula = models.CharField(max_length=30, verbose_name="Cédula")
     celular = models.CharField(max_length=30)
     mail = models.EmailField()
-    datos = models.TextField(null=True,blank=True)
+    datos = models.TextField(null=True, blank=True)
     actividad = models.ForeignKey(Actividad, blank=True, null=True)
+    fechaInscripcion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de inscripción")
 
     def __unicode__(self):
         return self.nombre + " " + self.apellido

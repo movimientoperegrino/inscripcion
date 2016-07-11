@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 __author__ = 'juanfranfv'
-
-
 from django import forms
 from models import *
 
+
 class InscripcionBaseForm(forms.ModelForm):
     confirmacion_mail = forms.EmailField(label="Confirmación del mail")
+
     class Meta:
         model = InscripcionBase
-        exclude = ['datos','actividad','puesto']
+        exclude = ['fechaInscripcion', 'datos', 'actividad', 'puesto']
 
     def clean(self):
         cleaned_data = super(InscripcionBaseForm, self).clean()
@@ -20,6 +20,7 @@ class InscripcionBaseForm(forms.ModelForm):
             raise forms.ValidationError(
                 "Los mails deben ser iguales"
             )
+
 
 class InscriptoInfo(forms.ModelForm):
     class Meta:

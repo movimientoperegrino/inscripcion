@@ -26,6 +26,7 @@
                         <th>CI</th>
                         <th>Telefono</th>
                         <th>Mail</th>
+                        <th>Fecha de inscripción</th>
 
                         {% for dato in cabecera %}
                             <th>{{ dato }}</th>
@@ -41,6 +42,7 @@
                             <td>{{ inscripto.cedula }}</td>
                             <td>{{ inscripto.celular }}</td>
                             <td>{{ inscripto.mail }}</td>
+                            <td>{{ inscripto.fechaInscripcion }}</td>
                             {% if inscripto.datos == None %}
                                 {% for dato in cabecera %}
                                     <td>None</td>

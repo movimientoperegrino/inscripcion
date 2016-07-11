@@ -294,6 +294,7 @@ def descargar_csv(request):
         aux = json.loads(entry.plugin_data)
         jsontitles.append(aux["name"])
         row.append(aux["label"])
+    row.append('Fecha de inscripcion')
     writer.writerow(row)
 
     for inscripto in lista_inscriptos:
@@ -303,7 +304,7 @@ def descargar_csv(request):
                 row.append(inscripto.datos[dato])
             except:
                 row.append("")
-
+        row.append(inscripto.fechaInscripcion)
         writer.writerow(row)
 
     return response
