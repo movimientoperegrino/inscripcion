@@ -171,7 +171,7 @@ def actividad_eliminada(request, id_actividad):
         actividad = Actividad.objects.get(pk=id_actividad)
     except Actividad.DoesNotExist:
         raise Http404
-    mensaje = u"La actividad " + actividad.nombre + " ha sido eliminada con éxito."
+    mensaje = u"La actividad " + actividad.nombre + u" ha sido eliminada con éxito."
     actividad.delete()
     actividades = Actividad.objects.all().order_by('fechaApertura').reverse()
     return render_to_response(
@@ -366,7 +366,7 @@ def inscripcion_actividad(request, idActividad):
 
     #si el estado de la actividad es finalizado, termina la inscripcion
     if actividad.estado == Actividad.FINALIZADO:
-        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + '" ha finalizado.'
+        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + u'" ha finalizado.'
         mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
         return render_to_response(
@@ -381,7 +381,7 @@ def inscripcion_actividad(request, idActividad):
     if cantidadInscriptos >= cantidadPermitida:
         actividad.estado = actividad.FINALIZADO
         actividad.save()
-        mensaje = u'El cupo  para "' + actividad.nombre + '" se encuentra lleno.'
+        mensaje = u'El cupo  para "' + actividad.nombre + u'" se encuentra lleno.'
         mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
         return render_to_response(
@@ -392,7 +392,7 @@ def inscripcion_actividad(request, idActividad):
 
     # se controla la fecha/hora de cierre
     if timezone.now() > actividad.fechaCierre:
-        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + '" ha finalizado.'
+        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + u'" ha finalizado.'
         mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
         mensaje += actividad.emailContacto
         if actividad.estado != actividad.FINALIZADO:
@@ -406,7 +406,7 @@ def inscripcion_actividad(request, idActividad):
 
     #se controla la fecha/hora de activacion
     if timezone.now() < actividad.fechaApertura:
-        mensaje = u'La inscripción a  la actividad "' + actividad.nombre + '" aún no se encuentra habilitada'
+        mensaje = u'La inscripción a  la actividad "' + actividad.nombre + u'" aún no se encuentra habilitada'
         return render_to_response(
             'error.html',
             {'mensaje': mensaje},
