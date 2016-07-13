@@ -299,7 +299,7 @@ def descargar_csv(request):
 
     for inscripto in lista_inscriptos:
         row = [inscripto.puesto, inscripto.nombre.encode('utf-8'), inscripto.apellido.encode('utf-8'),
-               inscripto.cedula, inscripto.telefono, inscripto.mail]
+               inscripto.cedula, inscripto.celular, inscripto.mail]
         for dato in jsontitles:
             try:
                 row.append(inscripto.datos[dato].encode('utf-8'))
