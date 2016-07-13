@@ -293,15 +293,16 @@ def descargar_csv(request):
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
         jsontitles.append(aux["name"])
-        row.append(aux["label"])
+        row.append(aux["label"].encode('utf-8'))
     row.append('Fecha de inscripcion')
     writer.writerow(row)
 
     for inscripto in lista_inscriptos:
-        row = [inscripto.puesto, inscripto.nombre, inscripto.apellido, inscripto.cedula, inscripto.cedula, inscripto.mail]
+        row = [inscripto.puesto, inscripto.nombre.encode('utf-8'), inscripto.apellido.encode('utf-8'),
+               inscripto.cedula, inscripto.telefono, inscripto.mail]
         for dato in jsontitles:
             try:
-                row.append(inscripto.datos[dato])
+                row.append(inscripto.datos[dato].encode('utf-8'))
             except:
                 row.append("")
         row.append(inscripto.fechaInscripcion)
