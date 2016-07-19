@@ -419,7 +419,7 @@ def inscripcion_actividad(request, idActividad):
                 ciBoolean = False
 
             if ciBoolean:
-                mensaje = u'Ya existe una inscripción con la cédula ' + cedula + u' en la actividad' + actividad
+                mensaje = u'Ya existe una inscripción con la cédula ' + cedula + u' en la actividad ' + actividad.nombre
                 messages.error(request, mensaje)
 
             inscripto = form.save()

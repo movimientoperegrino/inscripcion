@@ -54,7 +54,7 @@ class Actividad(models.Model):
     formDinamico = models.ForeignKey(FormEntry, blank=True, null=True)
 
     def __unicode__(self):
-        return self.nombre
+        return "%s" % self.nombre
 
 
 class InscripcionBase(models.Model):
