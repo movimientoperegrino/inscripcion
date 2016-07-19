@@ -104,7 +104,9 @@ def cerrar_sesion(request):
 
 @login_required(login_url='/login')
 def lista_actividades(request):
-    actividades = Actividad.objects.all().order_by('fechaApertura').reverse()
+    actividades = Actividad.objects.all().order_by('fechaApertura')
+    for a in actividades:
+        print a.fechaApertura
     return render_to_response(
         'admin/actividad_list.html',
         {'lista_actividades': actividades},
@@ -367,14 +369,9 @@ def inscripcion_actividad(request, idActividad):
 
     #si el estado de la actividad es finalizado, termina la inscripcion
     if actividad.estado == Actividad.FINALIZADO:
-        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + u'" ha finalizado.'
-        mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
-        mensaje += actividad.emailContacto
-        return render_to_response(
-            'error.html',
-            {'mensaje': mensaje},
-            context_instance=RequestContext(request)
-        )
+        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + u'" ha finalizado o se ha llenado'
+        messages.warning(request, mensaje)
+        return HttpResponseRedirect(reverse('inicio'))
 
     #se controla la cantidad de inscriptos
     cantidadPermitida = actividad.cantidadSuplentes + actividad.cantidadTitulares
@@ -382,37 +379,23 @@ def inscripcion_actividad(request, idActividad):
     if cantidadInscriptos >= cantidadPermitida:
         actividad.estado = actividad.FINALIZADO
         actividad.save()
-        mensaje = u'El cupo  para "' + actividad.nombre + u'" se encuentra lleno.'
-        mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
-        mensaje += actividad.emailContacto
-        return render_to_response(
-            'error.html',
-            {'mensaje': mensaje},
-            context_instance=RequestContext(request)
-        )
+        mensaje = u'La inscripción a la actividad: "' + actividad.nombre + u'" ha finalizado o se ha llenado'
+        messages.warning(request, mensaje)
+        return HttpResponseRedirect(reverse('inicio'))
 
     # se controla la fecha/hora de cierre
     if timezone.now() > actividad.fechaCierre:
         mensaje = u'La inscripción a la actividad: "' + actividad.nombre + u'" ha finalizado.'
-        mensaje += u' Si tiene alguna consulta, comuníquese con el encargado de inscripciones al correo: '
-        mensaje += actividad.emailContacto
         if actividad.estado != actividad.FINALIZADO:
             actividad.estado = actividad.FINALIZADO
             actividad.save()
-        return render_to_response(
-            'error.html',
-            {'mensaje': mensaje},
-            context_instance=RequestContext(request)
-        )
+        return HttpResponseRedirect(reverse('inicio'))
 
     #se controla la fecha/hora de activacion
     if timezone.now() < actividad.fechaApertura:
         mensaje = u'La inscripción a  la actividad "' + actividad.nombre + u'" aún no se encuentra habilitada'
-        return render_to_response(
-            'error.html',
-            {'mensaje': mensaje},
-            context_instance=RequestContext(request)
-        )
+        messages.warning(request, mensaje)
+        return HttpResponseRedirect(reverse('inicio'))
     else:
         if actividad.estado == Actividad.INACTIVO:
             actividad.estado = Actividad.ACTIVO
@@ -425,24 +408,20 @@ def inscripcion_actividad(request, idActividad):
         inscripcion.puesto = InscripcionBase.objects.filter(actividad=actividad).count() + 1
         form = InscripcionBaseForm(request.POST, instance=inscripcion)
         if form.is_valid():
-            cedula = form.cleaned_data['cedula']
+            cedula_raw = form.cleaned_data['cedula']
+            cedula = ''.join(e for e in cedula_raw if e.isalnum())
 
             #Si ciBoolean es True significa que ya se inscribieron con esa CI
             ciBoolean = True
             try:
-                    f = InscripcionBase.objects.get(actividad=actividad, cedula=cedula)
-
+                f = InscripcionBase.objects.get(actividad=actividad, cedula=cedula)
             except ObjectDoesNotExist:
-                    ciBoolean = False
+                ciBoolean = False
 
-            if ciBoolean == True:
-                suceso = False
-                mensaje = u'Usted ya se ha inscripto a esta actividad con esa cédula'
-                return render_to_response(
-                    'error.html',
-                    {'mensaje': mensaje},
-                    context_instance=RequestContext(request)
-        )
+            if ciBoolean:
+                mensaje = u'Ya existe una inscripción con la cédula ' + cedula + u' en la actividad' + actividad
+                messages.error(request, mensaje)
+
             inscripto = form.save()
 
             m, txt = encode_data(inscripto.id)
@@ -451,8 +430,6 @@ def inscripcion_actividad(request, idActividad):
             url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + m + '&text=' + txt
             enviar_mail_inscripcion(inscripto, url_info)
             return HttpResponseRedirect(url_info)
-
-
     else:
         form = InscripcionBaseForm()
 
@@ -462,9 +439,9 @@ def inscripcion_actividad(request, idActividad):
         'form': form,
     }
 
-
     return render_to_response('form.html', context,
                               context_instance=RequestContext(request))
+
 
 def inscripcion_extra(request):
     m = request.GET.get('m')
@@ -472,20 +449,15 @@ def inscripcion_extra(request):
     try:
         idInscripto = decode_data(m, text)
     except:
-        mensaje = u'La url no es correcta.'
-        return render_to_response(
-            'error.html',
-            {'mensaje': mensaje},
-            context_instance=RequestContext(request)
-        )
+        messages.error(request, u'La url no es correcta.')
+        return HttpResponseRedirect(reverse('inicio'))
+
     inscripto = get_object_or_404(InscripcionBase, pk=idInscripto)
-    if(inscripto.datos != None):
-        mensaje = u'Usted ya ha completado los datos extra.'
-        return render_to_response(
-            'error.html',
-            {'mensaje': mensaje},
-            context_instance=RequestContext(request)
-        )
+
+    if inscripto.datos is not None:
+        messages.error(request, u'Ya ha completado los datos extras.')
+        return HttpResponseRedirect(reverse('inicio'))
+
     form_entry = inscripto.actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
@@ -500,7 +472,6 @@ def inscripcion_extra(request):
     if 'POST' == request.method:
         form = FormClass(request.POST, request.FILES)
 
-
         if form.is_valid():
             field_name_to_label_map, cleaned_data = get_processed_form_data(
             form,
@@ -513,13 +484,8 @@ def inscripcion_extra(request):
             inscripto.save()
 
             mensaje = u'Su solicitud ha sido procesada con éxito. Gracias por inscribirse'
-            return render_to_response(
-                'suceso.html',
-                {'mensaje': mensaje},
-                context_instance=RequestContext(request)
-        )
-
-
+            messages.success(request, mensaje)
+            return HttpResponseRedirect(reverse('inicio'))
     else:
         # Providing initial form data by feeding entire GET dictionary
         # to the form, if ``GET_PARAM_INITIAL_DATA`` is present in the
@@ -536,139 +502,13 @@ def inscripcion_extra(request):
         except Exception as err:
             logger.error(err)
 
-
     context = {
         'form': form,
         'inscripto': inscripto,
     }
 
-
     return render_to_response('formextra.html', context,
                               context_instance=RequestContext(request))
-
-# def view_form_entry(request, form_entry_slug, theme=None, template_name=None):
-#     """
-#     View create form.
-#
-#     :param django.http.HttpRequest request:
-#     :param string form_entry_slug:
-#     :param fobi.base.BaseTheme theme: Theme instance.
-#     :param string template_name:
-#     :return django.http.HttpResponse:
-#     """
-#     try:
-#         kwargs = {'slug': form_entry_slug}
-#         if not request.user.is_authenticated():
-#             kwargs.update({'is_public': True})
-#         form_entry = FormEntry._default_manager.select_related('user') \
-#                               .get(**kwargs)
-#     except ObjectDoesNotExist as err:
-#         raise Http404(ugettext("Form entry not found."))
-#
-#     form_element_entries = form_entry.formelemententry_set.all()[:]
-#
-#     # This is where the most of the magic happens. Our form is being built
-#     # dynamically.
-#     FormClass = assemble_form_class(
-#         form_entry,
-#         form_element_entries = form_element_entries,
-#         request = request
-#     )
-#
-#     if 'POST' == request.method:
-#         form = FormClass(request.POST, request.FILES)
-#
-#         # Fire pre form validation callbacks
-#         fire_form_callbacks(form_entry=form_entry, request=request, form=form,
-#                             stage=CALLBACK_BEFORE_FORM_VALIDATION)
-#
-#         if form.is_valid():
-#             # Fire form valid callbacks, before handling submitted plugin
-#             # form data.
-#             form = fire_form_callbacks(
-#                 form_entry = form_entry,
-#                 request = request,
-#                 form = form,
-#                 stage = CALLBACK_FORM_VALID_BEFORE_SUBMIT_PLUGIN_FORM_DATA
-#             )
-#
-#             # Fire plugin processors
-#             form = submit_plugin_form_data(form_entry=form_entry,
-#                                            request=request, form=form)
-#
-#             # Fire form valid callbacks
-#             form = fire_form_callbacks(form_entry=form_entry,
-#                                        request=request, form=form,
-#                                        stage=CALLBACK_FORM_VALID)
-#
-#             # Run all handlers
-#             handler_responses, handler_errors = run_form_handlers(
-#                 form_entry = form_entry,
-#                 request = request,
-#                 form = form,
-#                 form_element_entries = form_element_entries
-#             )
-#
-#             # Warning that not everything went ok.
-#             if handler_errors:
-#                 for handler_error in handler_errors:
-#                     messages.warning(
-#                         request,
-#                         _("Error occured: {0}."
-#                           "").format(handler_error)
-#                     )
-#
-#             # Fire post handler callbacks
-#             fire_form_callbacks(
-#                 form_entry = form_entry,
-#                 request = request,
-#                 form = form,
-#                 stage = CALLBACK_FORM_VALID_AFTER_FORM_HANDLERS
-#                 )
-#
-#             messages.info(
-#                 request,
-#                 _("Form {0} was submitted successfully."
-#                   "").format(form_entry.name)
-#             )
-#             return redirect(
-#                 reverse('fobi.form_entry_submitted', args=[form_entry.slug])
-#             )
-#         else:
-#             # Fire post form validation callbacks
-#             fire_form_callbacks(form_entry=form_entry, request=request,
-#                                 form=form, stage=CALLBACK_FORM_INVALID)
-#
-#     else:
-#         # Providing initial form data by feeding entire GET dictionary
-#         # to the form, if ``GET_PARAM_INITIAL_DATA`` is present in the
-#         # GET.
-#         kwargs = {}
-#         if GET_PARAM_INITIAL_DATA in request.GET:
-#             kwargs = {'initial': request.GET}
-#         form = FormClass(**kwargs)
-#
-#     # In debug mode, try to identify possible problems.
-#     if DEBUG:
-#         try:
-#             form.as_p()
-#         except Exception as err:
-#             logger.error(err)
-#
-#     theme = get_theme(request=request, as_instance=True)
-#     theme.collect_plugin_media(form_element_entries)
-#
-#     context = {
-#         'form': form,
-#         'form_entry': form_entry,
-#         'fobi_theme': theme,
-#     }
-#
-#     if not template_name:
-#         template_name = theme.view_form_entry_template
-#
-#     return render_to_response(template_name, context,
-#                               context_instance=RequestContext(request))
 
 
 from django.conf import settings
@@ -748,10 +588,10 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
 class ActividadList(ListView):
-    actividades = Actividad.objects.all().order_by("tipo_id", "fechaApertura")
-    #Muestra las actividades que se van a habilitar en 15 dias o menos
-    fechaApertura = timezone.now() + timedelta(days=16)
+    #Muestra las actividades que se van a habilitar en 7 dias o menos
+    fechaApertura = timezone.now() + timedelta(days=8)
     # Muestra las actividades que no finalizaron aun
     fechafin = timezone.now() - timedelta(days=1)
+    actividades = Actividad.objects.filter(fechaCierre__gte=timezone.now()).order_by("tipo_id", "-fechaApertura")
     actividades = actividades.filter(fechaFin__gte=fechafin).filter(fechaApertura__lte=fechaApertura)
     queryset = actividades

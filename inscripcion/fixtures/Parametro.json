@@ -1,0 +1,26 @@
+[
+  {
+    "fields": {
+      "clave": "MAIL_TITULAR",
+      "valor": "Hola {{ inscripto.nombre }}\r\n\r\nCompletar tu inscripcion en {{ mail_url }}"
+    },
+    "model": "inscripcion.parametro",
+    "pk": 1
+  },
+  {
+    "fields": {
+      "clave": "MAIL_SUPLENTE",
+      "valor": "Hola perdedor {{ inscripto.nombre }}"
+    },
+    "model": "inscripcion.parametro",
+    "pk": 2
+  },
+  {
+    "fields": {
+      "clave": "SECRET_HASH",
+      "valor": "asdkfjoi1ejrm43ok4jrl2"
+    },
+    "model": "inscripcion.parametro",
+    "pk": 3
+  }
+]

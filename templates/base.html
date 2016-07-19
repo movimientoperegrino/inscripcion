@@ -14,6 +14,7 @@
 
 </head>
 <body>
+    {% load bootstrap3 %}
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
@@ -40,7 +41,14 @@
         </div>
     </nav>
     <div class="container">
+        {% bootstrap_messages %}
+
+        {% block content %}
+
+        {% endblock %}
+
         {% block contenido %}
+
         {% endblock %}
 
 

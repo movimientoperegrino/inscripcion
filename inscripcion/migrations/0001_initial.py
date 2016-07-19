@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fobi', '0003_auto_20160419_0929'),
+        ('fobi', '0003_auto_20160420_0022'),
     ]
 
     operations = [
@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='Actividad',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('nombre', models.CharField(max_length=100, verbose_name=b'Nombre *')),
+                ('nombre', models.CharField(max_length=100, verbose_name=b'Nombre')),
                 ('descripcion', models.TextField(verbose_name=b'Descripci\xc3\xb3n', blank=True)),
                 ('costo', models.CharField(max_length=100)),
                 ('requisitos', models.TextField()),
@@ -36,12 +36,14 @@ class Migration(migrations.Migration):
             name='InscripcionBase',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('puesto', models.PositiveIntegerField()),
                 ('nombre', models.CharField(max_length=100)),
                 ('apellido', models.CharField(max_length=100)),
-                ('cedula', models.CharField(max_length=30)),
+                ('cedula', models.CharField(max_length=30, verbose_name=b'C\xc3\xa9dula')),
                 ('celular', models.CharField(max_length=30)),
                 ('mail', models.EmailField(max_length=254)),
                 ('datos', models.TextField(null=True, blank=True)),
+                ('fechaInscripcion', models.DateTimeField(auto_now_add=True, verbose_name=b'Fecha de inscripci\xc3\xb3n')),
                 ('actividad', models.ForeignKey(blank=True, to='inscripcion.Actividad', null=True)),
             ],
         ),
@@ -49,7 +51,7 @@ class Migration(migrations.Migration):
             name='Lugar',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('nombre', models.CharField(max_length=100, verbose_name=b'Nombre *')),
+                ('nombre', models.CharField(max_length=100, verbose_name=b'Nombre')),
                 ('direccion', models.TextField(verbose_name=b'Direcci\xc3\xb3n', blank=True)),
                 ('descripcion', models.TextField(verbose_name=b'Descripci\xc3\xb3n', blank=True)),
                 ('url', models.URLField(blank=True)),
@@ -63,9 +65,21 @@ class Migration(migrations.Migration):
                 ('valor', models.TextField()),
             ],
         ),
+        migrations.CreateModel(
+            name='TipoActividad',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('nombre', models.CharField(max_length=100)),
+            ],
+        ),
         migrations.AddField(
             model_name='actividad',
             name='lugar',
             field=models.ForeignKey(blank=True, to='inscripcion.Lugar', null=True),
+        ),
+        migrations.AddField(
+            model_name='actividad',
+            name='tipo',
+            field=models.ForeignKey(verbose_name=b'Tipo de actividad', blank=True, to='inscripcion.TipoActividad', null=True),
         ),
     ]
