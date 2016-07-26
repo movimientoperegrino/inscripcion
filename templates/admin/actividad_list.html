@@ -19,7 +19,7 @@
     <ul class="list-group">
     {% for actividad in lista_actividades %}
         <li class="list-group-item">
-            <h4>{{ actividad.nombre }}</h4>
+            <h4>{{ actividad.tipo }}: {{ actividad.nombre }}</h4>
             <a href="{% url 'inscripcion.views.inscriptos_actividad' actividad.id %}" class="btn btn-info">Inscriptos</a>
             <a class="btn btn-info" href="/actividades/{{ actividad.id }}/editar">Editar actividad</a>
             <a class="btn btn-danger" href="/actividades/{{ actividad.id }}/eliminar">Eliminar actividad</a>

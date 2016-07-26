@@ -36,7 +36,11 @@
                     <tbody>
                     {% for inscripto in lista_inscriptos %}
                         <tr>
-                            <td>{{ inscripto.puesto }}</td>
+                            <td>
+                                <a href="{% url 'inscripcion.views.url_inscripcion_extra' inscripto.id %}">
+                                    {{ inscripto.puesto }}
+                                </a>
+                            </td>
                             <td>{{ inscripto.nombre }}</td>
                             <td>{{ inscripto.apellido }}</td>
                             <td>{{ inscripto.cedula }}</td>

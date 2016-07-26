@@ -50,5 +50,6 @@ urlpatterns = [
     url(r'^actividades/(?P<id_actividad>\d+)/eliminada/$', 'inscripcion.views.actividad_eliminada'),
     url(r'^logout/$', 'inscripcion.views.cerrar_sesion'),
     url(r'^login/$', 'inscripcion.views.iniciar_sesion'),
+    url(r'^urlinscripto/(?P<id_inscripto>\d+)/$', 'inscripcion.views.url_inscripcion_extra'),
 
 ]

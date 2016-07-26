@@ -104,7 +104,7 @@ def cerrar_sesion(request):
 
 @login_required(login_url='/login')
 def lista_actividades(request):
-    actividades = Actividad.objects.all().order_by('fechaApertura')
+    actividades = Actividad.objects.all().order_by('-fechaApertura')
     for a in actividades:
         print a.fechaApertura
     return render_to_response(
@@ -181,6 +181,16 @@ def actividad_eliminada(request, id_actividad):
         {'mensaje': mensaje, 'lista_actividades': actividades},
         context_instance=RequestContext(request)
     )
+
+
+@login_required(login_url='/login')
+def url_inscripcion_extra(request, id_inscripto):
+    m, txt = encode_data(str(id_inscripto))
+    url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + m + '&text=' + txt
+    messages.info(request, url_info)
+    inscripto = get_object_or_404(InscripcionBase, pk=id_inscripto)
+    return inscriptos_actividad(request, inscripto.actividad.id)
+
 
 @login_required(login_url='/login')
 def inscriptos_actividad(request, idActividad):
