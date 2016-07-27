@@ -9,8 +9,7 @@ from django.utils import timezone
 from models import *
 from forms import *
 import logging
-from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse
+
 import simplejson as json
 
 from django.template import RequestContext
@@ -35,30 +34,11 @@ from fobi.base import (
     form_handler_plugin_registry, submit_plugin_form_data, get_theme, get_processed_form_data
     #get_registered_form_handler_plugins
 )
-from fobi.form_importers import (
-    form_importer_plugin_registry, get_form_impoter_plugin_urls,
-    ensure_autodiscover as ensure_importers_autodiscover
-)
-from fobi.constants import (
-    CALLBACK_BEFORE_FORM_VALIDATION,
-    CALLBACK_FORM_VALID_BEFORE_SUBMIT_PLUGIN_FORM_DATA,
-    CALLBACK_FORM_VALID, CALLBACK_FORM_VALID_AFTER_FORM_HANDLERS,
-    CALLBACK_FORM_INVALID
-)
-from fobi.utils import (
-    get_user_form_field_plugin_uids,
-    #get_user_form_element_plugins,
-    get_user_form_element_plugins_grouped,
-    #get_user_form_handler_plugins_grouped,
-    get_user_form_handler_plugins, get_user_form_handler_plugin_uids,
-    append_edit_and_delete_links_to_field
-)
-from fobi.helpers import JSONDataExporter
+
 from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
 import csv
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.utils.encoding import smart_unicode
 
 
 
@@ -431,6 +411,7 @@ def inscripcion_actividad(request, idActividad):
             if ciBoolean:
                 mensaje = u'Ya existe una inscripción con la cédula ' + cedula + u' en la actividad ' + actividad.nombre
                 messages.error(request, mensaje)
+                return HttpResponseRedirect(reverse('inicio'))
 
             inscripto = form.save()
 
