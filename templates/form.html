@@ -35,6 +35,10 @@
 {% block scripts %}
     <script type="text/javascript">
         $(document).ready(function () {
+            $("#formulario").submit(function(){
+                $("#save").prop( "disabled", true );
+                return true;
+            });
             $('#save').click(function(){
                 $('#bar').addClass('active').attr('aria-valuenow', '99%').css('width', '99%');
 
