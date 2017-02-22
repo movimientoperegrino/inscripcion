@@ -166,7 +166,8 @@ def actividad_eliminada(request, id_actividad):
 @login_required(login_url='/login')
 def url_inscripcion_extra(request, id_inscripto):
     m, txt = encode_data(str(id_inscripto))
-    url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + m + '&text=' + txt
+    #url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m="' + m + '"&text="' + txt +'"'
+    url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + urllib.quote(m) + '&text=' + urllib.quote(txt)
     messages.info(request, url_info)
     inscripto = get_object_or_404(InscripcionBase, pk=id_inscripto)
     return inscriptos_actividad(request, inscripto.actividad.id)
@@ -418,7 +419,7 @@ def inscripcion_actividad(request, idActividad):
             m, txt = encode_data(inscripto.id)
             print m
             print txt
-            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + m + '&text=' + txt
+            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + urllib.quote(m) + '&text=' + urllib.quote(txt)
             enviar_mail_inscripcion(inscripto, url_info)
             return HttpResponseRedirect(url_info)
     else:
