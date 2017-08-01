@@ -291,14 +291,17 @@ def descargar_csv(request):
     writer.writerow(row)
 
     for inscripto in lista_inscriptos:
-        row = [inscripto.puesto.encode('utf-8'), inscripto.nombre.encode('utf-8'), inscripto.apellido.encode('utf-8'),
+        row = [inscripto.puesto, inscripto.nombre.encode('utf-8'), inscripto.apellido.encode('utf-8'),
                inscripto.cedula.encode('utf-8'), inscripto.celular.encode('utf-8'), inscripto.mail.encode('utf-8')]
         for dato in jsontitles:
             try:
-                row.append(inscripto.datos[dato].encode('utf-8'))
+                if(isinstance(inscripto.datos[dato], str)):
+                    row.append(inscripto.datos[dato].encode('utf-8'))
+                else:
+                    row.append(str(inscripto.datos[dato]))
             except:
                 row.append("".encode('utf-8'))
-        row.append(inscripto.fechaInscripcion.encode('utf-8'))
+        row.append(inscripto.fechaInscripcion)
         writer.writerow(row)
 
     return response
