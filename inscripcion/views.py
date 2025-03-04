@@ -6,19 +6,19 @@ from django.shortcuts import render
 import datetime
 from datetime import timedelta
 from django.utils import timezone
-from models import *
-from forms import *
+from .models import *
+from .forms import *
 import logging
 
 import simplejson as json
 
 from django.template import RequestContext
-from django.shortcuts import render_to_response, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404, HttpResponseRedirect, HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib import messages
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import models, IntegrityError
 from django.utils.datastructures import MultiValueDictKeyError
@@ -51,14 +51,13 @@ def info_inscripto(request):
     inscripto = InscripcionBase.objects.get(id=inscripto_id)
     form = InscriptoInfo(instance=inscripto)
     context = {'form': form}
-    return render_to_response('form.html', context,
-                              context_instance=RequestContext(request))
+    return render(request, 'form.html', context)
 
 
 
 def iniciar_sesion(request):
     mensaje =""
-    if not request.user.is_anonymous():
+    if not request.user.is_anonymous:
         return HttpResponseRedirect('/actividades')
     if request.method == 'POST':
         form = AuthenticationForm(request.POST)
@@ -75,8 +74,7 @@ def iniciar_sesion(request):
 
     else:
         form = AuthenticationForm()
-    return render_to_response('admin/login.html', {'form': form, 'mensaje': mensaje},
-                              context_instance=RequestContext(request))
+    return render(request, 'admin/login.html', {'form': form, 'mensaje': mensaje})
 
 def cerrar_sesion(request):
     logout(request)
@@ -86,11 +84,11 @@ def cerrar_sesion(request):
 def lista_actividades(request):
     actividades = Actividad.objects.all().order_by('-fechaApertura')
     for a in actividades:
-        print a.fechaApertura
-    return render_to_response(
+        print(a.fechaApertura)
+    return render(
+        request,
         'admin/actividad_list.html',
-        {'lista_actividades': actividades},
-        context_instance=RequestContext(request)
+        {'lista_actividades': actividades}
     )
 
 
@@ -107,10 +105,10 @@ def nueva_actividad(request):
         form = ActividadForm()
 
     titulo = 'Nueva actividad'
-    return render_to_response(
+    return render(
+        request,
         'admin/form.html',
         {'form': form, 'titulo': titulo},
-        context_instance=RequestContext(request)
     )
 
 @login_required(login_url='/login')
@@ -129,10 +127,10 @@ def editar_actividad(request, id_actividad):
         form = ActividadForm(instance=actividad)
 
     titulo = 'Editar actividad: ' + actividad.nombre
-    return render_to_response(
+    return render(
+        request,
         'admin/form.html',
         {'form': form, 'titulo': titulo},
-        context_instance=RequestContext(request)
     )
 
 @login_required(login_url='/login')
@@ -141,10 +139,10 @@ def eliminar_actividad(request, id_actividad):
         actividad = Actividad.objects.get(pk=id_actividad)
     except Actividad.DoesNotExist:
         raise Http404
-    return render_to_response(
+    return render(
+        request,
         'admin/eliminar_actividad.html',
         {'actividad': actividad},
-        context_instance=RequestContext(request)
     )
 
 @login_required(login_url='/login')
@@ -156,10 +154,10 @@ def actividad_eliminada(request, id_actividad):
     mensaje = u"La actividad " + actividad.nombre + u" ha sido eliminada con éxito."
     actividad.delete()
     actividades = Actividad.objects.all().order_by('fechaApertura').reverse()
-    return render_to_response(
+    return render(
+        request,
         'admin/actividad_list.html',
         {'mensaje': mensaje, 'lista_actividades': actividades},
-        context_instance=RequestContext(request)
     )
 
 
@@ -167,7 +165,7 @@ def actividad_eliminada(request, id_actividad):
 def url_inscripcion_extra(request, id_inscripto):
     m, txt = encode_data(str(id_inscripto))
     #url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m="' + m + '"&text="' + txt +'"'
-    url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + urllib.quote(m) + '&text=' + urllib.quote(txt)
+    url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
     messages.info(request, url_info)
     inscripto = get_object_or_404(InscripcionBase, pk=id_inscripto)
     return inscriptos_actividad(request, inscripto.actividad.id)
@@ -195,7 +193,7 @@ def inscriptos_actividad(request, idActividad):
     for inscripto in lista_inscriptos:
         if inscripto.datos != None:
             inscripto.datos = json.loads(inscripto.datos)
-    m, txt = encode_data(actividad.id)
+    m, txt = encode_data(str(actividad.id))
 
 
     url_contacto = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + m + '&text=' + txt
@@ -207,8 +205,7 @@ def inscriptos_actividad(request, idActividad):
                'url_contacto': url_contacto,
                'url_csv': url_csv,
                }
-    return render_to_response('admin/inscriptos.html', context,
-                              context_instance=RequestContext(request))
+    return render(request, 'admin/inscriptos.html', context)
 
 
 def lista_inscriptos(request):
@@ -218,10 +215,10 @@ def lista_inscriptos(request):
         actividad_id = decode_data(m, text)
     except:
         mensaje = u'La url no es correcta.'
-        return render_to_response(
+        return render(
+            request,
             'error.html',
             {'mensaje': mensaje},
-            context_instance=RequestContext(request)
         )
     actividad = get_object_or_404(Actividad, pk=actividad_id)
     form_entry = actividad.formDinamico
@@ -245,8 +242,7 @@ def lista_inscriptos(request):
                'jsontitles': jsontitles,
                'url_csv': url_csv,
                }
-    return render_to_response('inscriptos.html', context,
-                              context_instance=RequestContext(request))
+    return render(request, 'inscriptos.html', context)
 
 
 def descargar_csv(request):
@@ -256,10 +252,10 @@ def descargar_csv(request):
         actividad_id = decode_data(m, text)
     except:
         mensaje = u'La url no es correcta.'
-        return render_to_response(
+        return render(
+            request,
             'error.html',
             {'mensaje': mensaje},
-            context_instance=RequestContext(request)
         )
     actividad = get_object_or_404(Actividad, pk=actividad_id)
     # print actividad
@@ -324,7 +320,7 @@ def form(request, form_entry_slug, theme=None, template_name=None):
         form_entry = FormEntry._default_manager.select_related('user') \
                               .get(**kwargs)
     except ObjectDoesNotExist as err:
-        raise Http404(ugettext("Form entry not found."))
+        raise Http404(gettext("Form entry not found."))
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
 
@@ -353,8 +349,7 @@ def form(request, form_entry_slug, theme=None, template_name=None):
     }
 
 
-    return render_to_response('form.html', context,
-                              context_instance=RequestContext(request))
+    return render(request, 'form.html', context)
 
 
 
@@ -395,7 +390,7 @@ def inscripcion_actividad(request, idActividad):
             actividad.estado = Actividad.ACTIVO
             actividad.save()
 
-    print request.get_full_path()
+    print(request.get_full_path())
     if request.method == 'POST':
         inscripcion = InscripcionBase()
         inscripcion.actividad = actividad
@@ -419,23 +414,22 @@ def inscripcion_actividad(request, idActividad):
 
             inscripto = form.save()
 
-            m, txt = encode_data(inscripto.id)
-            print m
-            print txt
-            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + urllib.quote(m) + '&text=' + urllib.quote(txt)
+            m, txt = encode_data(str(inscripto.id))
+            print(m)
+            print(txt)
+            url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscripto?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
             enviar_mail_inscripcion(inscripto, url_info)
             return HttpResponseRedirect(url_info)
     else:
         form = InscripcionBaseForm()
 
-    print request.META['HTTP_HOST']
-    print request.scheme
+    print(request.META['HTTP_HOST'])
+    print(request.scheme)
     context = {
         'form': form,
     }
 
-    return render_to_response('form.html', context,
-                              context_instance=RequestContext(request))
+    return render(request, 'form.html', context)
 
 
 def inscripcion_extra(request):
@@ -502,29 +496,69 @@ def inscripcion_extra(request):
         'inscripto': inscripto,
     }
 
-    return render_to_response('formextra.html', context,
-                              context_instance=RequestContext(request))
+    return render(request, 'formextra.html', context)
 
 
 from django.conf import settings
 from django.template import Template, Context
 
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+import base64
+import smtplib
 
-def envio_mail(destino, cuerpo, asunto, adjunto=None):
-    from django.core.validators import validate_email
-    from django.core.exceptions import ValidationError
-    from django.core.mail import EmailMultiAlternatives
+def get_oauth2_token():
+    creds = Credentials(
+        None,
+        refresh_token=settings.EMAIL_OAUTH2_REFRESH_TOKEN,  # Pull from settings.py
+        token_uri='https://oauth2.googleapis.com/token',
+        client_id=settings.EMAIL_OAUTH2_CLIENT_ID,
+        client_secret=settings.EMAIL_OAUTH2_CLIENT_SECRET,
+    )
+    creds.refresh(Request()) 
+    return creds.token
 
-    origen = '[Movimiento Peregrino] <retiros-noreply@movimientoperegrino.org>'
-    destino = 'informatica@movimientoperegrino.org' if settings.DESARROLLO else destino
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-    try:
-        #validate_email(destino)
-        msg = EmailMultiAlternatives(asunto, cuerpo, origen, [destino])
-        msg.attach_alternative(cuerpo, 'text/html')
-        msg.send()
-    except ValidationError:
-        print "Error en el envio de mail"
+
+def send_email(to_email, body, subject):
+    access_token = get_oauth2_token()
+    
+    auth_string = f"user={settings.EMAIL_HOST_USER}\1auth=Bearer {access_token}\1\1"
+    auth_encoded = base64.b64encode(auth_string.encode()).decode()
+
+    server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT)
+    server.starttls()
+    server.ehlo()
+    server.docmd("AUTH", "XOAUTH2 " + auth_encoded)
+
+    msg = MIMEMultipart()
+    msg["From"] = settings.EMAIL_HOST_USER
+    msg["To"] = to_email
+    msg["Subject"] = subject
+
+    msg.attach(MIMEText(body, "html", "utf-8"))
+
+    server.sendmail(settings.EMAIL_HOST_USER, to_email, msg.as_string())  
+    server.quit()
+
+
+# def envio_mail(destino, cuerpo, asunto, adjunto=None):
+#     from django.core.validators import validate_email
+#     from django.core.exceptions import ValidationError
+#     from django.core.mail import EmailMultiAlternatives
+
+#     origen = '[Movimiento Peregrino] <retiros-noreply@movimientoperegrino.org>'
+#     destino = 'informatica@movimientoperegrino.org' if settings.DESARROLLO else destino
+
+#     try:
+#         #validate_email(destino)
+#         msg = EmailMultiAlternatives(asunto, cuerpo, origen, [destino])
+#         msg.attach_alternative(cuerpo, 'text/html')
+#         msg.send()
+#     except ValidationError:
+#         print("Error en el envio de mail")
 
 def enviar_mail_inscripcion(inscripcion_guardada, url_info):
    """ Prepara y envia el mail para una inscripción realizada.
@@ -548,35 +582,40 @@ def enviar_mail_inscripcion(inscripcion_guardada, url_info):
        template = Template(parametro.valor)
 
    html_render = template.render(context)
-   envio_mail(inscripcion_guardada.mail, html_render, inscripcion_guardada.actividad.nombre)
+   send_email(inscripcion_guardada.mail, html_render, inscripcion_guardada.actividad.nombre)
 
 
 
 import hashlib, zlib
-import cPickle as pickle
+import pickle
 import urllib
 
 
 def encode_data(data):
-    my_secret = Parametro.objects.get(clave=settings.SECRET_HASH_KEY)
     """Turn `data` into a hash and an encoded string, suitable for use with `decode_data`."""
-    text = zlib.compress(pickle.dumps(data, 0)).encode('base64').replace('\n', '')
-    m = hashlib.md5(my_secret.valor + text).hexdigest()[:12]
+    my_secret = Parametro.objects.get(clave=settings.SECRET_HASH_KEY)
 
-    return m, text
+    compressed_data = zlib.compress(pickle.dumps(data, 0))
+    encoded_data = base64.b64encode(compressed_data).decode('utf-8')
+
+    m = hashlib.md5((my_secret.valor + encoded_data).encode('utf-8')).hexdigest()[:12] 
+
+    return m, encoded_data
 
 def decode_data(hash, enc):
-    my_secret = Parametro.objects.get(clave=settings.SECRET_HASH_KEY)
     """The inverse of `encode_data`."""
-    text = urllib.unquote(enc)
-    m = hashlib.md5(my_secret.valor + text).hexdigest()[:12]
+    my_secret = Parametro.objects.get(clave=settings.SECRET_HASH_KEY)
+
+    text = urllib.parse.unquote(enc)
+    m = hashlib.md5((my_secret.valor + text).encode('utf-8')).hexdigest()[:12] 
+
     if m != hash:
         raise Exception("Bad hash!")
-    data = pickle.loads(zlib.decompress(text.decode('base64')))
+
+    decoded_data = base64.b64decode(text)
+    data = pickle.loads(zlib.decompress(decoded_data)) 
 
     return data
-
-    #print decode_data(hash, enc)
 
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView

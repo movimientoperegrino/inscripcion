@@ -99,16 +99,15 @@ INSTALLED_APPS = (
     'handler',
 )
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-)
+]
 
 ROOT_URLCONF = 'mp.urls'
 
@@ -175,10 +174,25 @@ SITE_ID = 1
 
 
 #Configuracion del email
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'mail.movimientoperegrino.org'
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'mail.movimientoperegrino.org'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'retiros-noreply@movimientoperegrino.org'
+# EMAIL_HOST_PASSWORD = 'macabeos1974!'
+# DEFAULT_FROM_EMAIL = 'retiros-noreply@movimientoperegrino.org'
+# DEFAULT_TO_EMAIL = 'retiros-noreply@movimientoperegrino.org'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
+EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'retiros-noreply@movimientoperegrino.org'
-EMAIL_HOST_PASSWORD = 'macabeos1974!'
-DEFAULT_FROM_EMAIL = 'retiros-noreply@movimientoperegrino.org'
-DEFAULT_TO_EMAIL = 'retiros-noreply@movimientoperegrino.org'
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_OAUTH2_REFRESH_TOKEN")
+
+# OAuth2 Configuration
+EMAIL_OAUTH2_CLIENT_ID = os.getenv("EMAIL_OAUTH2_CLIENT_ID")
+EMAIL_OAUTH2_CLIENT_SECRET = os.getenv("EMAIL_OAUTH2_CLIENT_SECRET")
+EMAIL_OAUTH2_REFRESH_TOKEN = os.getenv("EMAIL_OAUTH2_REFRESH_TOKEN")
+
+DEFAULT_CHARSET = "utf-8"
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
