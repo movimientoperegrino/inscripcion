@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 __author__ = 'juanfranfv'
 from django import forms
-from models import *
+from .models import *
 
 
 class InscripcionBaseForm(forms.ModelForm):

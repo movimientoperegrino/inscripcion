@@ -1,55 +1,43 @@
 """mp URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.8/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
+    https://docs.djangoproject.com/en/4.2/topics/http/urls/
 """
-from django.conf.urls import include, url
+
+from django.urls import include, re_path
 from django.contrib import admin
-from inscripcion import views
+from inscripcion import views as inscripcion_views
+from fobi.views import view_form_entry
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
+    re_path(r'^admin/', admin.site.urls),
 
-    # View URLs
-    url(r'^fobi/', include('fobi.urls.view')),
+    # View URLs from django-fobi
+    re_path(r'^fobi/', include('fobi.urls.view')),
 
-    # Edit URLs
-    url(r'^fobi/', include('fobi.urls.edit')),
+    # Edit URLs from django-fobi
+    re_path(r'^fobi/', include('fobi.urls.edit')),
 
-     #DB Store plugin URLs
-    url(r'^fobi/plugins/form-handlers/db-store/',
-        include('fobi.contrib.plugins.form_handlers.db_store.urls')),
+    # DB Store plugin URLs
+    re_path(r'^fobi/plugins/form-handlers/db-store/', include('fobi.contrib.plugins.form_handlers.db_store.urls')),
 
-    # View form entry
-    url(r'^view/(?P<form_entry_slug>[\w_\-]+)/$',
-        'fobi.views.view_form_entry',
-        name='fobi.view_form_entry'),
+    # View form entry (converted from string to callable)
+    re_path(r'^view/(?P<form_entry_slug>[\w_\-]+)/$', view_form_entry, name='fobi.view_form_entry'),
 
-    url(r'^$', views.ActividadList.as_view(), name='inicio'),
-
-    url(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', 'inscripcion.views.form'),
-
-    url(r'^actividad/(?P<idActividad>\d+)/$', 'inscripcion.views.inscripcion_actividad'),
-    url(r'^lista/(?P<idActividad>\d+)/$', 'inscripcion.views.inscriptos_actividad'),
-    url(r'^csv/$', 'inscripcion.views.descargar_csv'),
-    url(r'^inscripto/$', 'inscripcion.views.inscripcion_extra'),
-    url(r'^inscriptos/$', 'inscripcion.views.lista_inscriptos'),
-    url(r'^actividades/$', 'inscripcion.views.lista_actividades'),
-    url(r'^actividades/nueva$', 'inscripcion.views.nueva_actividad'),
-    url(r'^actividades/(?P<id_actividad>\d+)/editar/$', 'inscripcion.views.editar_actividad'),
-    url(r'^actividades/(?P<id_actividad>\d+)/eliminar/$', 'inscripcion.views.eliminar_actividad'),
-    url(r'^actividades/(?P<id_actividad>\d+)/eliminada/$', 'inscripcion.views.actividad_eliminada'),
-    url(r'^logout/$', 'inscripcion.views.cerrar_sesion'),
-    url(r'^login/$', 'inscripcion.views.iniciar_sesion'),
-    url(r'^urlinscripto/(?P<id_inscripto>\d+)/$', 'inscripcion.views.url_inscripcion_extra'),
-
+    # Custom application URLs (using callables instead of string references)
+    re_path(r'^$', inscripcion_views.ActividadList.as_view(), name='inicio'),
+    re_path(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', inscripcion_views.form, name='form'),
+    re_path(r'^actividad/(?P<idActividad>\d+)/$', inscripcion_views.inscripcion_actividad, name='actividad'),
+    re_path(r'^lista/(?P<idActividad>\d+)/$', inscripcion_views.inscriptos_actividad, name='lista'),
+    re_path(r'^csv/$', inscripcion_views.descargar_csv, name='csv'),
+    re_path(r'^inscripto/$', inscripcion_views.inscripcion_extra, name='inscripto'),
+    re_path(r'^inscriptos/$', inscripcion_views.lista_inscriptos, name='inscriptos'),
+    re_path(r'^actividades/$', inscripcion_views.lista_actividades, name='actividades'),
+    re_path(r'^actividades/nueva$', inscripcion_views.nueva_actividad, name='nueva_actividad'),
+    re_path(r'^actividades/(?P<id_actividad>\d+)/editar/$', inscripcion_views.editar_actividad, name='editar_actividad'),
+    re_path(r'^actividades/(?P<id_actividad>\d+)/eliminar/$', inscripcion_views.eliminar_actividad, name='eliminar_actividad'),
+    re_path(r'^actividades/(?P<id_actividad>\d+)/eliminada/$', inscripcion_views.actividad_eliminada, name='actividad_eliminada'),
+    re_path(r'^logout/$', inscripcion_views.cerrar_sesion, name='logout'),
+    re_path(r'^login/$', inscripcion_views.iniciar_sesion, name='login'),
+    re_path(r'^urlinscripto/(?P<id_inscripto>\d+)/$', inscripcion_views.url_inscripcion_extra, name='urlinscripto'),
 ]

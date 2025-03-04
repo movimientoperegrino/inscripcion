@@ -8,13 +8,13 @@ class Parametro(models.Model):
     clave = models.CharField(max_length=100)
     valor = models.TextField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.clave
 
 class TipoActividad(models.Model):
     nombre =  models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
 
 class Lugar(models.Model):
@@ -23,13 +23,13 @@ class Lugar(models.Model):
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     url = models.URLField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre
 
 class Actividad(models.Model):
     nombre = models.CharField(max_length=100, verbose_name="Nombre")
-    tipo = models.ForeignKey(TipoActividad, blank=True, null=True, verbose_name="Tipo de actividad")
-    lugar = models.ForeignKey(Lugar, blank=True, null=True)
+    tipo = models.ForeignKey(TipoActividad, blank=True, null=True, verbose_name="Tipo de actividad", on_delete=models.CASCADE)
+    lugar = models.ForeignKey(Lugar, blank=True, null=True, on_delete=models.CASCADE)
     descripcion = models.TextField(blank=True, verbose_name="Descripción")
     costo = models.CharField(max_length=100)
     requisitos = models.TextField()
@@ -51,9 +51,9 @@ class Actividad(models.Model):
         (FINALIZADO, 'Finalizado'),
     )
     estado = models.CharField(max_length=1, choices=ESTADO_OPCIONES, default=INACTIVO)
-    formDinamico = models.ForeignKey(FormEntry, blank=True, null=True)
+    formDinamico = models.ForeignKey(FormEntry, blank=True, null=True, on_delete=models.CASCADE)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s" % self.nombre
 
 
@@ -65,8 +65,8 @@ class InscripcionBase(models.Model):
     celular = models.CharField(max_length=30)
     mail = models.EmailField()
     datos = models.TextField(null=True, blank=True)
-    actividad = models.ForeignKey(Actividad, blank=True, null=True)
+    actividad = models.ForeignKey(Actividad, blank=True, null=True, on_delete=models.CASCADE)
     fechaInscripcion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de inscripción")
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nombre + " " + self.apellido

@@ -37,7 +37,7 @@
                     {% for inscripto in lista_inscriptos %}
                         <tr>
                             <td>
-                                <a href="{% url 'inscripcion.views.url_inscripcion_extra' inscripto.id %}">
+                                <a href="{% url 'urlinscripto' inscripto.id %}">
                                     {{ inscripto.puesto }}
                                 </a>
                             </td>
@@ -61,7 +61,7 @@
                     </tbody>
                 </table>
                 </div>
-                <a href="{% url 'inscripcion.views.lista_actividades' %}" class="btn btn-default">Volver</a>
+                <a href="{% url 'actividades' %}" class="btn btn-default">Volver</a>
             </div>
         </div>
     </div>
