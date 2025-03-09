@@ -2,7 +2,20 @@ django>=5.1.6
 psycopg2-binary>=2.9.9
 django-db-connection-pool>=1.2.4
 python-dotenv>=1.0.0
-django-cache-memoize>=0.1.10 
+django-cache-memoize>=0.1.10
 django-fobi>=0.19.9
 google-auth>=2.0.0
 google-auth-oauthlib>=0.4.6
+
+# Django Fobi and its dependencies
+django-bootstrap3>=23.1
+easy-thumbnails>=2.8.5
+simplejson>=3.19.2
+
+# Additional required packages
+django-nine>=0.2.7  # Required by django-fobi
+vishap>=0.1.5  # Required by django-fobi
+django-autoslug>=1.9.9  # Required by django-fobi
+django-nonefield>=0.4  # Required by django-fobi
+transliterate>=1.10.2  # Required by django-fobi
+Pillow>=10.0.0  # Required for image handling
