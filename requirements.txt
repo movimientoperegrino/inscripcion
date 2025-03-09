@@ -1,0 +1,5 @@
+django>=5.1.6
+psycopg2-binary>=2.9.9
+django-db-connection-pool>=1.2.4
+python-dotenv>=1.0.0
+django-cache-memoize>=0.1.10 

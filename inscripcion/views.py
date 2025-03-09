@@ -40,7 +40,9 @@ import csv
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 
-
+from django.core.cache import cache
+from functools import lru_cache
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -194,10 +196,8 @@ def inscriptos_actividad(request, idActividad):
         if inscripto.datos != None:
             inscripto.datos = json.loads(inscripto.datos)
     m, txt = encode_data(str(actividad.id))
-
-
-    url_contacto = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + m + '&text=' + txt
-    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + m + '&text=' + txt
+    url_contacto = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
+    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
                'cabecera': cabecera,
@@ -258,12 +258,6 @@ def descargar_csv(request):
             {'mensaje': mensaje},
         )
     actividad = get_object_or_404(Actividad, pk=actividad_id)
-    # print actividad
-    # m, txt = encode_data(idActividad)
-    # print m
-    # print txt
-    # url_info = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + m + '&text=' + txt
-    # return HttpResponseRedirect(url_info)
     form_entry = actividad.formDinamico
 
     form_element_entries = form_entry.formelemententry_set.all()[:]
@@ -510,7 +504,7 @@ import smtplib
 def get_oauth2_token():
     creds = Credentials(
         None,
-        refresh_token=settings.EMAIL_OAUTH2_REFRESH_TOKEN,  # Pull from settings.py
+        refresh_token=settings.EMAIL_OAUTH2_REFRESH_TOKEN,
         token_uri='https://oauth2.googleapis.com/token',
         client_id=settings.EMAIL_OAUTH2_CLIENT_ID,
         client_secret=settings.EMAIL_OAUTH2_CLIENT_SECRET,
@@ -544,45 +538,28 @@ def send_email(to_email, body, subject):
     server.quit()
 
 
-# def envio_mail(destino, cuerpo, asunto, adjunto=None):
-#     from django.core.validators import validate_email
-#     from django.core.exceptions import ValidationError
-#     from django.core.mail import EmailMultiAlternatives
-
-#     origen = '[Movimiento Peregrino] <retiros-noreply@movimientoperegrino.org>'
-#     destino = 'informatica@movimientoperegrino.org' if settings.DESARROLLO else destino
-
-#     try:
-#         #validate_email(destino)
-#         msg = EmailMultiAlternatives(asunto, cuerpo, origen, [destino])
-#         msg.attach_alternative(cuerpo, 'text/html')
-#         msg.send()
-#     except ValidationError:
-#         print("Error en el envio de mail")
+@lru_cache(maxsize=2)
+def get_mail_template(is_titular):
+    """Cache mail templates to avoid repeated database queries."""
+    key = settings.MAIL_TITULAR_KEY if is_titular else settings.MAIL_SUPLENTE_KEY
+    return Parametro.objects.get(clave=key).valor
 
 def enviar_mail_inscripcion(inscripcion_guardada, url_info):
-   """ Prepara y envia el mail para una inscripción realizada.
-   """
+    """Prepara y envia el mail para una inscripción realizada."""
+    actividad = inscripcion_guardada.actividad
+    is_titular = inscripcion_guardada.puesto <= actividad.cantidadTitulares
+    
+    template_valor = get_mail_template(is_titular)
+    template = Template(template_valor)
+    
+    context = Context({
+        'inscripto': inscripcion_guardada,
+        'contactoTitular': actividad.emailContacto,
+        'mail_url' if is_titular else 'url_info': url_info
+    })
 
-   actividad = inscripcion_guardada.actividad
-
-   template = None
-   html_render = None
-   context = None
-   if inscripcion_guardada.puesto <= actividad.cantidadTitulares: #inscripcion_guardada.posicion <= actividad.cantidad_titulares:
-       context = Context(
-           {'inscripto': inscripcion_guardada, 'contactoTitular': inscripcion_guardada.actividad.emailContacto,'mail_url': url_info})
-       parametro = Parametro.objects.get(clave=settings.MAIL_TITULAR_KEY)
-       template = Template(parametro.valor)
-   else:
-       context = Context(
-           {'inscripto': inscripcion_guardada, 'contactoTitular': inscripcion_guardada.actividad.emailContacto,
-           'url_info': url_info})
-       parametro = Parametro.objects.get(clave=settings.MAIL_SUPLENTE_KEY)
-       template = Template(parametro.valor)
-
-   html_render = template.render(context)
-   send_email(inscripcion_guardada.mail, html_render, inscripcion_guardada.actividad.nombre)
+    html_render = template.render(context)
+    send_email(inscripcion_guardada.mail, html_render, actividad.nombre)
 
 
 
@@ -590,27 +567,34 @@ import hashlib, zlib
 import pickle
 import urllib
 
+@lru_cache(maxsize=1)
+def get_secret_hash():
+    """Cache the secret hash value to avoid repeated database queries."""
+    return Parametro.objects.get(clave=settings.SECRET_HASH_KEY).valor
 
 def encode_data(data):
     """Turn `data` into a hash and an encoded string, suitable for use with `decode_data`."""
-    my_secret = Parametro.objects.get(clave=settings.SECRET_HASH_KEY)
-
+    secret_value = get_secret_hash()
+    
     compressed_data = zlib.compress(pickle.dumps(data, 0))
     encoded_data = base64.b64encode(compressed_data).decode('utf-8')
 
-    m = hashlib.md5((my_secret.valor + encoded_data).encode('utf-8')).hexdigest()[:12] 
+    m = hashlib.md5((secret_value + encoded_data).encode('utf-8')).hexdigest()[:12] 
 
     return m, encoded_data
 
-def decode_data(hash, enc):
-    """The inverse of `encode_data`."""
-    my_secret = Parametro.objects.get(clave=settings.SECRET_HASH_KEY)
-
-    text = urllib.parse.unquote(enc)
-    m = hashlib.md5((my_secret.valor + text).encode('utf-8')).hexdigest()[:12] 
+def decode_data(hash, text):
+    """Turn a hash and encoded string (generated by `encode_data`) back into the original data."""
+    secret_value = get_secret_hash()
+    
+    # URL-decode both parameters since they were URL-encoded when generating the URL
+    hash = urllib.parse.unquote(hash)
+    text = urllib.parse.unquote(text)
+    
+    m = hashlib.md5((secret_value + text).encode('utf-8')).hexdigest()[:12] 
 
     if m != hash:
-        raise Exception("Bad hash!")
+        raise Exception(f"Bad hash! Expected {m} but got {hash}")
 
     decoded_data = base64.b64decode(text)
     data = pickle.loads(zlib.decompress(decoded_data)) 
