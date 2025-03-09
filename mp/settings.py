@@ -31,7 +31,7 @@ SECRET_KEY = 'r((4#co(x$xq!$v7n*emfi9xcjx)_oy3-dw7r4xq5al9n_+*e+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['movimientoperegrino.org', 'inscripcion-mp.ondigitalocean.app']
 
 
 # Application definition
