@@ -31,8 +31,6 @@ SECRET_KEY = 'r((4#co(x$xq!$v7n*emfi9xcjx)_oy3-dw7r4xq5al9n_+*e+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['movimientoperegrino.org', 'inscripcion-mp.ondigitalocean.app']
-
 
 # Application definition
 
@@ -101,6 +99,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -198,3 +197,43 @@ EMAIL_OAUTH2_REFRESH_TOKEN = os.getenv("EMAIL_OAUTH2_REFRESH_TOKEN")
 DEFAULT_CHARSET = "utf-8"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Enable WhiteNoise compression and caching
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    X_FRAME_OPTIONS = 'DENY'
+
+# Allowed hosts
+ALLOWED_HOSTS = ['inscripcion-mp.ondigitalocean.app', 'movimientoperegrino.org', 'localhost', '127.0.0.1']
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}

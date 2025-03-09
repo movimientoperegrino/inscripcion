@@ -6,6 +6,8 @@ django-cache-memoize>=0.1.10
 django-fobi>=0.19.9
 google-auth>=2.0.0
 google-auth-oauthlib>=0.4.6
+gunicorn>=21.2.0
+whitenoise>=6.6.0  # For serving static files
 
 # Django Fobi and its dependencies
 django-bootstrap3>=23.1
