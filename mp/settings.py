@@ -136,12 +136,18 @@ WSGI_APPLICATION = 'mp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'mp_inscripcion',
-        'USER': 'mp',
-        'PASSWORD': 'mp',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'ENGINE': 'django_db_pool.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME', 'mp_inscripcion'),
+        'USER': os.getenv('DB_USER', 'mp'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'mp'),
+        'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+        'POOL_OPTIONS': {
+            'POOL_SIZE': int(os.getenv('DB_POOL_SIZE', 20)),
+            'MAX_OVERFLOW': 10,
+            'RECYCLE': 300,  # Connection recycle time in seconds
+            'TIMEOUT': int(os.getenv('DB_POOL_TIMEOUT', 30))  # Pool timeout in seconds
+        },
     }
 }
 
