@@ -12,8 +12,12 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 
-DESARROLLO = False
+# Load environment variables from .env file
+load_dotenv()
+
 # Parametros del Sistema
 MAIL_TITULAR_KEY = "MAIL_TITULAR"
 MAIL_SUPLENTE_KEY = "MAIL_SUPLENTE"
@@ -26,10 +30,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'r((4#co(x$xq!$v7n*emfi9xcjx)_oy3-dw7r4xq5al9n_+*e+'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 
 # Application definition
@@ -136,18 +140,13 @@ WSGI_APPLICATION = 'mp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django_db_pool.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'mp_inscripcion'),
         'USER': os.getenv('DB_USER', 'mp'),
         'PASSWORD': os.getenv('DB_PASSWORD', 'mp'),
         'HOST': os.getenv('DB_HOST', '127.0.0.1'),
         'PORT': os.getenv('DB_PORT', '5432'),
-        'POOL_OPTIONS': {
-            'POOL_SIZE': int(os.getenv('DB_POOL_SIZE', 20)),
-            'MAX_OVERFLOW': 10,
-            'RECYCLE': 300,  # Connection recycle time in seconds
-            'TIMEOUT': int(os.getenv('DB_POOL_TIMEOUT', 30))  # Pool timeout in seconds
-        },
+        'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
     }
 }
 
@@ -218,9 +217,14 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     X_FRAME_OPTIONS = 'DENY'
+    
+    # Settings for proxy/load balancer
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+    USE_X_FORWARDED_PORT = True
 
 # Allowed hosts
-ALLOWED_HOSTS = ['inscripcion-mp-4zy8l.ondigitalocean.app', 'movimientoperegrino.org', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Logging configuration
 LOGGING = {

@@ -1,6 +1,5 @@
 django>=5.1.6
 psycopg2-binary>=2.9.9
-django-db-connection-pool>=1.2.4
 python-dotenv>=1.0.0
 django-cache-memoize>=0.1.10
 django-fobi>=0.19.9
@@ -8,6 +7,9 @@ google-auth>=2.0.0
 google-auth-oauthlib>=0.4.6
 gunicorn>=21.2.0
 whitenoise>=6.6.0  # For serving static files
+django-extensions>=3.2.3  # For development SSL server
+werkzeug>=3.0.1  # Required by django-extensions
+pyOpenSSL>=24.0.0  # Required for SSL development server
 
 # Django Fobi and its dependencies
 django-bootstrap3>=23.1
