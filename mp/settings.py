@@ -214,7 +214,7 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
 
 # Allowed hosts
-ALLOWED_HOSTS = ['inscripcion-mp.ondigitalocean.app', 'movimientoperegrino.org', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['inscripcion-mp-4zy8l.ondigitalocean.app', 'movimientoperegrino.org', 'localhost', '127.0.0.1']
 
 # Logging configuration
 LOGGING = {
