@@ -421,6 +421,8 @@ def inscripcion_actividad(request, idActividad):
     print(request.scheme)
     context = {
         'form': form,
+        'nombre_actividad': actividad.nombre,
+
     }
 
     return render(request, 'form.html', context)
