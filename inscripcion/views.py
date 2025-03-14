@@ -235,7 +235,7 @@ def lista_inscriptos(request):
         if inscripto.datos != None:
             inscripto.datos = json.loads(inscripto.datos)
 
-    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + m + '&text=' + text
+    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(text)
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
                'cabecera': cabecera,
