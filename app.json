@@ -1,0 +1,26 @@
+{
+  "name": "mp-inscripcion",
+  "description": "Sistema de inscripción del Movimiento Peregrino",
+  "env": {
+    "DISABLE_COLLECTSTATIC": {
+      "description": "Disable collectstatic during build",
+      "value": "1"
+    },
+    "DJANGO_SETTINGS_MODULE": {
+      "description": "Django settings module",
+      "value": "mp.settings"
+    },
+    "SECRET_KEY": {
+      "description": "A secret key for verifying the integrity of signed cookies",
+      "generator": "secret"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "scripts": {
+    "postdeploy": "python manage.py migrate"
+  }
+} 
