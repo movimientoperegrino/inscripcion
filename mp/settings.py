@@ -156,7 +156,7 @@ DATABASES = {
 
 LANGUAGE_CODE = 'es'
 
-TIME_ZONE = 'America/Asuncion'
+TIME_ZONE = 'America/Argentina/Buenos_Aires'
 
 USE_I18N = True
 
