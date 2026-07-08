@@ -247,6 +247,11 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
 /* ---------- acciones agrupadas ---------- */
 .acciones-top { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
 
+/* ---------- footer ---------- */
+.site-footer { border-top: 1px solid var(--line); margin-top: 56px; padding: 28px 0 40px; color: var(--ink-mute); font-size: 13px; text-align: center; }
+.site-footer p { margin: 2px 0; }
+.site-footer a { color: var(--ink-soft); }
+
 /* ---------- home: grilla de actividades ---------- */
 .acts { display: flex; flex-direction: column; gap: 36px; }
 .acts-group-title {
