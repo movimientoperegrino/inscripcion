@@ -10,6 +10,8 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+    <meta name="theme-color" content="#2C5169">
 
 
 </head>
@@ -24,18 +26,15 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <!-- <a class="navbar-brand" href="/">MP</a> -->
                 <a href="/" class="navbar-brand">
                     <img src="{% static 'img/logo-mp.png' %}"
-                         style="max-width:50px; margin-top: -7px;">
+                         style="max-width:44px; margin-top: -7px;">
                 </a>
-                <a href="#" class="navbar-brand">Inscripciones - MP</a>
+                <a href="/" class="navbar-brand">Movimiento Peregrino</a>
             </div>
             <div id="navbar" class="collapse navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li><a href="/login"></a></li>
+                <ul class="nav navbar-nav navbar-right">
                     {% block navbar %}{% endblock %}
-
                 </ul>
             </div>
         </div>
