@@ -16,7 +16,7 @@
         <div class="col-sm-12 ">
             {% bootstrap_messages %}
             <form id="formulario" method="post" action="" class="form">{% csrf_token %}
-                {% bootstrap_form form layout='horizontal' %}
+                {% bootstrap_form form %}
                 {% buttons %}
                 <button id="save" type="submit" class="btn btn-primary">
                     {% bootstrap_icon "floppy-disk" %} Guardar

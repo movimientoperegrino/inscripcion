@@ -4,53 +4,45 @@
 {% block contenido %}
     {% regroup object_list by tipo as lista_actividades %}
 
+    <div class="acts">
     {% for tipo in lista_actividades %}
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading"><h4>{{ tipo.grouper }}</h4></div>
-                <div class="panel-body">
-                    <ul class="list-group">
-                    {% for i in tipo.list %}
-                        <li class="list-group-item">
-                            <h3>
-                                {{ i.nombre }}
-                                {% if i.estado == 'F' %}
-                                    {% bootstrap_button "Finalizado" size='xs' button_class="btn-warning" %}
-                                {% endif %}
-                            </h3>
-                                {% if i.estado == 'F' %}
-                                    <dl class="dl-horizontal">
-                                        <dt>Fecha de Inicio</dt>
-                                        <dd>{{ i.fechaInicio }}</dd>
-                                        <dt>Fecha de Finalización</dt>
-                                        <dd>{{ i.fechaFin }}</dd>
-                                        <dt>Lugar</dt>
-                                        <dd><a href="{{ i.lugar.url }}">{{ i.lugar }}</a></dd>
-                                    </dl>
-                                {% else %}
-                                    <dl class="dl-horizontal">
-                                        <dt>Fecha de Inicio</dt>
-                                        <dd>{{ i.fechaInicio }}</dd>
-                                        <dt>Fecha de Finalización</dt>
-                                        <dd>{{ i.fechaFin }}</dd>
-                                        <dt>Lugar</dt>
-                                        <dd><a href="{{ i.lugar.url }}">{{ i.lugar }}</a></dd>
-                                        <dt>Costo</dt>
-                                        <dd>{{ i.costo }}</dd>
-                                        <dt>Fecha de apertura:</dt>
-                                        <dd>{{ i.fechaApertura }}</dd>
-                                         <dt>Requisitos:</dt>
-                                        <dd>{{ i.requisitos }}</dd>
-                                    </dl>
-                                    <a href="{% url 'actividad' i.id %}" class="btn btn-default">Inscribirse</a>
-                                {% endif %}
-                        </li>
+        <section class="acts-group">
+            <h2 class="acts-group-title">{{ tipo.grouper }}</h2>
+            <div class="acts-grid">
+            {% for i in tipo.list %}
+                <article class="act-card">
+                    <div class="act-card-head">
+                        <h3>{{ i.nombre }}</h3>
+                        {% if i.estado == 'F' %}
+                            <span class="act-pill act-pill-done">Finalizado</span>
+                        {% endif %}
+                    </div>
 
-                    {% endfor %}
-                    </ul>
-                </div>
+                    <dl class="act-meta">
+                        <dt>Inicio</dt><dd>{{ i.fechaInicio }}</dd>
+                        <dt>Fin</dt><dd>{{ i.fechaFin }}</dd>
+                        <dt>Lugar</dt><dd><a href="{{ i.lugar.url }}">{{ i.lugar }}</a></dd>
+                        {% if i.estado != 'F' %}
+                            <dt>Costo</dt><dd>{{ i.costo }}</dd>
+                            <dt>Apertura</dt><dd>{{ i.fechaApertura }}</dd>
+                        {% endif %}
+                    </dl>
+
+                    {% if i.estado != 'F' and i.requisitos %}
+                        <div class="act-reqs">
+                            <span class="act-reqs-label">Requisitos</span>
+                            <p>{{ i.requisitos }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if i.estado != 'F' %}
+                        <a href="{% url 'actividad' i.id %}" class="btn btn-primary">Inscribirse</a>
+                    {% endif %}
+                </article>
+            {% endfor %}
             </div>
-        </div>
+        </section>
     {% endfor %}
+    </div>
 
 {% endblock %}
