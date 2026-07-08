@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% block titulo %}{{ titulo }} — Movimiento Peregrino{% endblock %}
 {% block contenido %}
     {# Load the tag library #}
 {% load bootstrap3 %}
@@ -19,7 +20,7 @@
                 {% bootstrap_form form %}
                 {% buttons %}
                     <button type="submit" class="btn btn-primary">
-                        {% bootstrap_icon "floppy-disk" %} Guardar
+                        {% bootstrap_icon "floppy-disk" %} Guardar actividad
                     </button>
                     <a href="{% url 'actividades' %}" class="btn btn-default">Volver</a>
                 {% endbuttons %}
