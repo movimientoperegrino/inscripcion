@@ -189,6 +189,10 @@ def inscriptos_actividad(request, idActividad):
     jsontitles=[]
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
+        # Los elementos de contenido (content_text/image/video) no tienen
+        # label/name; solo se listan los campos de entrada reales.
+        if "label" not in aux or "name" not in aux:
+            continue
         cabecera.append(aux["label"])
         jsontitles.append(aux["name"])
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
@@ -228,6 +232,10 @@ def lista_inscriptos(request):
     jsontitles=[]
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
+        # Los elementos de contenido (content_text/image/video) no tienen
+        # label/name; solo se listan los campos de entrada reales.
+        if "label" not in aux or "name" not in aux:
+            continue
         cabecera.append(aux["label"])
         jsontitles.append(aux["name"])
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
@@ -275,6 +283,9 @@ def descargar_csv(request):
     jsontitles=[]
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
+        # Saltar elementos de contenido sin label/name (no son campos).
+        if "label" not in aux or "name" not in aux:
+            continue
         jsontitles.append(aux["name"])
         row.append(aux["label"].encode('utf-8'))
     row.append('Fecha de inscripcion')
@@ -608,10 +619,23 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
 class ActividadList(ListView):
-    #Muestra las actividades que se van a habilitar en 7 dias o menos
-    fechaApertura = timezone.now() + timedelta(days=8)
-    # Muestra las actividades que no finalizaron aun
-    fechafin = timezone.now() - timedelta(days=1)
-    actividades = Actividad.objects.filter(fechaCierre__gte=timezone.now()).order_by("tipo_id", "-fechaApertura")
-    actividades = actividades.filter(fechaFin__gte=fechafin).filter(fechaApertura__lte=fechaApertura)
-    queryset = actividades
+    def get_queryset(self):
+        """
+        Compute queryset per-request.
+
+        If this is defined as a class attribute, it's evaluated at import time and
+        won't reflect new Actividad rows until the server restarts.
+        """
+        # Muestra las actividades que se van a habilitar en 7 dias o menos
+        fecha_apertura = timezone.now() + timedelta(days=8)
+        # Muestra las actividades que no finalizaron aun
+        fecha_fin = timezone.now() - timedelta(days=1)
+
+        qs = (
+            Actividad.objects
+            .filter(fechaCierre__gte=timezone.now())
+            .filter(fechaFin__gte=fecha_fin)
+            .filter(fechaApertura__lte=fecha_apertura)
+            .order_by("tipo_id", "-fechaApertura")
+        )
+        return qs
