@@ -194,7 +194,7 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
 .table-responsive {
   border: 1px solid var(--line);
   border-radius: var(--card-radius);
-  overflow: hidden;
+  overflow-x: auto;
   background: var(--surface);
 }
 
