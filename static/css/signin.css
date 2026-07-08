@@ -1,40 +1,58 @@
+/* Pantalla de login — card centrada, usa los tokens de theme.css */
+
 body {
-  padding-top: 40px;
-  padding-bottom: 40px;
-  background-color: #eee;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ground);
+}
+
+.container {
+  width: 100%;
+  max-width: none;
+  display: flex;
+  justify-content: center;
 }
 
 .form-signin {
-  max-width: 330px;
-  padding: 15px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 360px;
+  margin: 24px;
+  padding: 34px 30px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
 }
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-  margin-bottom: 10px;
+
+.form-signin h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 24px;
+  margin: 0 0 18px;
+  text-align: center;
 }
-.form-signin .checkbox {
-  font-weight: normal;
-}
+
 .form-signin .form-control {
-  position: relative;
   height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
+  min-height: 44px;
+  padding: 11px 13px;
+  font-size: 15px;
+  margin-bottom: 12px;
 }
-.form-signin .form-control:focus {
-  z-index: 2;
+
+.form-signin .btn {
+  margin-top: 6px;
 }
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
-}
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+
+.signin-logo { display: block; height: 46px; margin: 0 auto 14px; }
+/* El logo es blanco: en claro se oscurece para que no desaparezca sobre
+   la card clara; en oscuro queda tal cual (blanco sobre oscuro). */
+.signin-logo { filter: brightness(0); }
+@media (prefers-color-scheme: dark) { .signin-logo { filter: none; } }
+
+.form-signin p {
+  margin: 0;
 }
