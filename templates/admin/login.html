@@ -18,6 +18,7 @@
 <body>
     <div class="container">
         <form class="form-signin" id="formulario" method="post" action="">{% csrf_token %}
+            <img src="{% static 'img/logo-mp.png' %}" alt="Movimiento Peregrino" class="signin-logo">
             <h2>Iniciar sesión</h2>
             <input type="text" name="username" value="" id="username" placeholder="Usuario" class="form-control" required autofocus>
 

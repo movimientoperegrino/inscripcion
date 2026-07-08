@@ -47,6 +47,12 @@ body {
   margin-top: 6px;
 }
 
+.signin-logo { display: block; height: 46px; margin: 0 auto 14px; }
+/* El logo es blanco: en claro se oscurece para que no desaparezca sobre
+   la card clara; en oscuro queda tal cual (blanco sobre oscuro). */
+.signin-logo { filter: brightness(0); }
+@media (prefers-color-scheme: dark) { .signin-logo { filter: none; } }
+
 .form-signin p {
   margin: 0;
 }
