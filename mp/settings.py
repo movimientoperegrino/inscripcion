@@ -247,3 +247,12 @@ LOGGING = {
         },
     },
 }
+
+# fobi content_text sanea el HTML con bleach. Por defecto en <a> solo permite
+# href/title, por lo que borra target y rel. Los habilitamos para poder abrir
+# los links de pago en una pestaña nueva con rel="noopener noreferrer".
+FOBI_PLUGIN_CONTENT_TEXT_ALLOWED_ATTRIBUTES = {
+    "a": ["href", "title", "target", "rel"],
+    "abbr": ["title"],
+    "acronym": ["title"],
+}
