@@ -77,8 +77,17 @@ hr { border-color: var(--line); }
   font-family: var(--serif);
   font-weight: 600;
   font-size: 18px;
-  line-height: 34px;
 }
+/* Marca: logo + wordmark en un solo bloque, centrado verticalmente */
+.navbar-brand.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 64px;
+  padding: 0 15px;
+}
+.brand-logo { height: 38px; width: auto; }
+.brand-name { line-height: 1; }
 .navbar-inverse .navbar-nav > li > a { color: var(--ink-soft); font-weight: 500; }
 .navbar-inverse .navbar-nav > li > a:hover,
 .navbar-inverse .navbar-nav > li > a:focus { color: var(--ink); background: transparent; }
@@ -278,6 +287,8 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
 }
 .act-meta dt { color: var(--ink-mute); font-weight: 600; }
 .act-meta dd { margin: 0; color: var(--ink); }
+/* links dentro de la meta: subrayados para no competir con el boton CTA */
+.act-meta dd a { text-decoration: underline; text-underline-offset: 2px; }
 .act-reqs { border-top: 1px solid var(--line); padding-top: 12px; }
 .act-reqs-label {
   display: block;
@@ -289,4 +300,11 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
   margin-bottom: 5px;
 }
 .act-reqs p { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
-.act-card .btn { align-self: flex-start; margin-top: 2px; }
+/* CTA dominante: bloque full-width al pie de la card, alineado entre cards */
+.act-card .btn {
+  align-self: stretch;
+  width: 100%;
+  margin-top: auto;
+  padding: 12px 16px;
+  font-size: 15px;
+}
