@@ -154,6 +154,10 @@ hr { border-color: var(--line); }
 
 /* ---------- formularios ---------- */
 .control-label, .form-group label, label { color: var(--ink-soft); font-weight: 600; }
+/* Forms apilados (label arriba) con ancho contenido y ritmo prolijo */
+.form { max-width: 640px; }
+.form-group { margin-bottom: 18px; }
+.form-group > label, .form-group .control-label { margin-bottom: 6px; display: inline-block; }
 .form-control {
   height: auto;
   min-height: 42px;
@@ -169,8 +173,9 @@ hr { border-color: var(--line); }
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
-textarea.form-control { min-height: 92px; }
-.help-block { color: var(--ink-mute); font-size: 13px; }
+/* alto razonable para textareas (fobi los renderiza muy altos) */
+textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
+.help-block { color: var(--ink-mute); font-size: 13px; margin-top: 6px; }
 .form-control::placeholder { color: var(--ink-mute); }
 
 /* ---------- tablas ---------- */
@@ -218,3 +223,64 @@ textarea.form-control { min-height: 92px; }
 
 /* Enlaces de contenido (fobi content_text): boton de pago mas visible */
 .panel-body a.btn, .list-group-item a.btn { text-decoration: none; }
+
+/* ---------- home: grilla de actividades ---------- */
+.acts { display: flex; flex-direction: column; gap: 36px; }
+.acts-group-title {
+  font-size: 22px;
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.acts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+.act-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.act-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.act-card-head h3 { font-size: 19px; margin: 0; line-height: 1.25; }
+.act-pill {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.act-pill-done { background: var(--warn-bg); color: var(--warn-fg); }
+.act-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  margin: 0;
+  font-size: 14px;
+}
+.act-meta dt { color: var(--ink-mute); font-weight: 600; }
+.act-meta dd { margin: 0; color: var(--ink); }
+.act-reqs { border-top: 1px solid var(--line); padding-top: 12px; }
+.act-reqs-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin-bottom: 5px;
+}
+.act-reqs p { margin: 0; font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
+.act-card .btn { align-self: flex-start; margin-top: 2px; }
