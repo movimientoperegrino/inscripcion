@@ -36,7 +36,6 @@ from fobi.base import (
 )
 
 from fobi.settings import GET_PARAM_INITIAL_DATA, DEBUG
-import csv
 import io
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -202,14 +201,12 @@ def inscriptos_actividad(request, idActividad):
             inscripto.datos = json.loads(inscripto.datos)
     m, txt = encode_data(str(actividad.id))
     url_contacto = request.scheme + '://' + request.META['HTTP_HOST'] + '/inscriptos?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
-    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
     url_excel = request.scheme + '://' + request.META['HTTP_HOST'] + '/excel?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(txt)
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
                'cabecera': cabecera,
                'jsontitles': jsontitles,
                'url_contacto': url_contacto,
-               'url_csv': url_csv,
                'url_excel': url_excel,
                }
     return render(request, 'admin/inscriptos.html', context)
@@ -246,71 +243,14 @@ def lista_inscriptos(request):
         if inscripto.datos != None:
             inscripto.datos = json.loads(inscripto.datos)
 
-    url_csv = request.scheme + '://' + request.META['HTTP_HOST'] + '/csv?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(text)
     url_excel = request.scheme + '://' + request.META['HTTP_HOST'] + '/excel?m=' + urllib.parse.quote(m) + '&text=' + urllib.parse.quote(text)
     context = {'lista_inscriptos': lista_inscriptos,
                'actividad': actividad,
                'cabecera': cabecera,
                'jsontitles': jsontitles,
-               'url_csv': url_csv,
                'url_excel': url_excel,
                }
     return render(request, 'inscriptos.html', context)
-
-
-def descargar_csv(request):
-    m = request.GET.get('m')
-    text = request.GET.get('text')
-    try:
-        actividad_id = decode_data(m, text)
-    except:
-        mensaje = u'La url no es correcta.'
-        return render(
-            request,
-            'error.html',
-            {'mensaje': mensaje},
-        )
-    actividad = get_object_or_404(Actividad, pk=actividad_id)
-    form_entry = actividad.formDinamico
-
-    form_element_entries = form_entry.formelemententry_set.all()[:]
-
-    lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
-    for inscripto in lista_inscriptos:
-        if inscripto.datos != None:
-            inscripto.datos = json.loads(inscripto.datos)
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="inscriptos.csv"'
-
-    writer = csv.writer(response, delimiter=';')
-    row = ['Puesto', 'Nombre', 'Apellido', 'Cedula', 'Telefono', 'Email']
-    jsontitles=[]
-    for entry in form_element_entries:
-        aux = json.loads(entry.plugin_data)
-        # Saltar elementos de contenido sin label/name (no son campos).
-        if "label" not in aux or "name" not in aux:
-            continue
-        jsontitles.append(aux["name"])
-        row.append(aux["label"].encode('utf-8'))
-    row.append('Fecha de inscripcion')
-    writer.writerow(row)
-
-    for inscripto in lista_inscriptos:
-        row = [inscripto.puesto, inscripto.nombre.encode('utf-8'), inscripto.apellido.encode('utf-8'),
-               inscripto.cedula.encode('utf-8'), inscripto.celular.encode('utf-8'), inscripto.mail.encode('utf-8')]
-        for dato in jsontitles:
-            try:
-                if(isinstance(inscripto.datos[dato], str)):
-                    row.append(inscripto.datos[dato].encode('utf-8'))
-                else:
-                    row.append(str(inscripto.datos[dato]))
-            except:
-                row.append("".encode('utf-8'))
-        row.append(inscripto.fechaInscripcion)
-        writer.writerow(row)
-
-    return response
 
 
 def descargar_excel(request):
