@@ -6,25 +6,29 @@
     <li><a href="/logout">Cerrar sesion</a></li>
 {% endblock %}
 {% block contenido %}
-    <div class="row">
-        <div class="col-sm-12 ">
-            <h2>Actividades del Movimiento Peregrino <a class="btn btn-default" href="/actividades/nueva">Agregar actividad</a></h2>
+  <div class="admin-head">
+    <h2>Actividades</h2>
+    <a class="btn btn-primary" href="/actividades/nueva">Agregar actividad</a>
+  </div>
+  {% if mensaje %}<div class="alert alert-warning" role="alert">{{ mensaje }}</div>{% endif %}
 
-        </div>
-    </div>
-
-    {% if mensaje %}
-        <div class="alert alert-warning" role="alert">{{ mensaje }}</div>
-    {% endif %}
-    <ul class="list-group">
+  {% if lista_actividades %}
+  <div class="admin-list">
     {% for actividad in lista_actividades %}
-        <li class="list-group-item">
-            <h4>{{ actividad.tipo }}: {{ actividad.nombre }}</h4>
-            <a href="{% url 'lista' actividad.id %}" class="btn btn-info">Inscriptos</a>
-            <a class="btn btn-info" href="/actividades/{{ actividad.id }}/editar">Editar actividad</a>
-            <a class="btn btn-danger" href="/actividades/{{ actividad.id }}/eliminar">Eliminar actividad</a>
-        </li>
+      <div class="admin-row">
+        <div class="admin-row-info">
+          <span class="admin-row-tipo">{{ actividad.tipo }}</span>
+          <span class="admin-row-nombre">{{ actividad.nombre }}</span>
+        </div>
+        <div class="admin-row-actions">
+          <a href="{% url 'lista' actividad.id %}" class="btn btn-primary btn-sm">Inscriptos</a>
+          <a href="/actividades/{{ actividad.id }}/editar" class="btn btn-default btn-sm">Editar</a>
+          <a href="/actividades/{{ actividad.id }}/eliminar" class="btn btn-link-danger btn-sm">Eliminar</a>
+        </div>
+      </div>
     {% endfor %}
-    </ul>
-
+  </div>
+  {% else %}
+    <div class="empty-state"><p>No hay actividades cargadas.</p></div>
+  {% endif %}
 {% endblock %}

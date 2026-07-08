@@ -335,3 +335,16 @@ button:focus-visible, [tabindex]:focus-visible {
 .stepper li { font-size: 13px; font-weight: 600; color: var(--ink-mute); padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; }
 .stepper li.is-active { color: #fff; background: var(--accent); border-color: var(--accent); }
 .stepper li.is-done { color: var(--accent-strong); border-color: var(--accent-soft); background: var(--accent-soft); }
+
+/* ---------- lista de actividades (admin) ---------- */
+.admin-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.admin-head h2 { margin: 0; }
+.admin-list { display: flex; flex-direction: column; gap: 10px; }
+.admin-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--card-radius); padding: 14px 18px; }
+.admin-row-info { display: flex; flex-direction: column; gap: 2px; }
+.admin-row-tipo { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-mute); }
+.admin-row-nombre { font-family: var(--serif); font-size: 17px; color: var(--ink); }
+.admin-row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-link-danger { background: transparent; border-color: transparent; color: var(--bad-fg); }
+.btn-link-danger:hover, .btn-link-danger:focus { background: var(--bad-bg); color: var(--bad-fg); }
