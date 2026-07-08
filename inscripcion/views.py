@@ -189,6 +189,10 @@ def inscriptos_actividad(request, idActividad):
     jsontitles=[]
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
+        # Los elementos de contenido (content_text/image/video) no tienen
+        # label/name; solo se listan los campos de entrada reales.
+        if "label" not in aux or "name" not in aux:
+            continue
         cabecera.append(aux["label"])
         jsontitles.append(aux["name"])
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
@@ -228,6 +232,10 @@ def lista_inscriptos(request):
     jsontitles=[]
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
+        # Los elementos de contenido (content_text/image/video) no tienen
+        # label/name; solo se listan los campos de entrada reales.
+        if "label" not in aux or "name" not in aux:
+            continue
         cabecera.append(aux["label"])
         jsontitles.append(aux["name"])
     lista_inscriptos = InscripcionBase.objects.filter(actividad=actividad).order_by('puesto')
@@ -275,6 +283,9 @@ def descargar_csv(request):
     jsontitles=[]
     for entry in form_element_entries:
         aux = json.loads(entry.plugin_data)
+        # Saltar elementos de contenido sin label/name (no son campos).
+        if "label" not in aux or "name" not in aux:
+            continue
         jsontitles.append(aux["name"])
         row.append(aux["label"].encode('utf-8'))
     row.append('Fecha de inscripcion')
