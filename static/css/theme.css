@@ -87,6 +87,12 @@ hr { border-color: var(--line); }
 .navbar-inverse .navbar-toggle:focus { background: var(--surface-2); }
 .navbar-inverse .navbar-toggle .icon-bar { background: var(--ink-soft); }
 .navbar-inverse .navbar-collapse { border-color: var(--line); }
+/* El logo es blanco: en modo claro se lo oscurece para que no desaparezca
+   sobre el navbar blanco; en oscuro queda tal cual (blanco sobre oscuro). */
+.navbar-brand img { filter: brightness(0); }
+@media (prefers-color-scheme: dark) { .navbar-brand img { filter: none; } }
+:root[data-theme="dark"] .navbar-brand img { filter: none; }
+:root[data-theme="light"] .navbar-brand img { filter: brightness(0); }
 
 /* ---------- botones ---------- */
 .btn {
