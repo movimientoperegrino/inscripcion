@@ -244,6 +244,9 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
 .empty-state h2 { margin: 0 0 8px; font-size: 22px; color: var(--ink); }
 .empty-state p { margin: 0; }
 
+/* ---------- acciones agrupadas ---------- */
+.acciones-top { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+
 /* ---------- home: grilla de actividades ---------- */
 .acts { display: flex; flex-direction: column; gap: 36px; }
 .acts-group-title {
