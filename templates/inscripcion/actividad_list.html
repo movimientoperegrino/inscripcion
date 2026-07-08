@@ -4,6 +4,7 @@
 {% block titulo %}Actividades — Movimiento Peregrino{% endblock %}
 
 {% block contenido %}
+    {% if object_list %}
     {% regroup object_list by tipo as lista_actividades %}
 
     <div class="acts">
@@ -46,5 +47,11 @@
         </section>
     {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state">
+        <h2>No hay actividades abiertas</h2>
+        <p>Por ahora no hay inscripciones disponibles. Volvé a visitarnos pronto.</p>
+    </div>
+    {% endif %}
 
 {% endblock %}

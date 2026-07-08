@@ -239,6 +239,11 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
 /* Enlaces de contenido (fobi content_text): boton de pago mas visible */
 .panel-body a.btn, .list-group-item a.btn { text-decoration: none; }
 
+/* ---------- estados vacios ---------- */
+.empty-state { text-align: center; padding: 56px 24px; color: var(--ink-mute); }
+.empty-state h2 { margin: 0 0 8px; font-size: 22px; color: var(--ink); }
+.empty-state p { margin: 0; }
+
 /* ---------- home: grilla de actividades ---------- */
 .acts { display: flex; flex-direction: column; gap: 36px; }
 .acts-group-title {
