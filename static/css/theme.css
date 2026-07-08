@@ -212,6 +212,13 @@ textarea.form-control { min-height: 96px; height: 110px; resize: vertical; }
   overflow-x: auto;
   background: var(--surface);
 }
+.table-responsive table th:first-child,
+.table-responsive table td:first-child {
+  position: sticky; left: 0; z-index: 1;
+  background: var(--surface);
+}
+.table-responsive table thead th:first-child { background: var(--surface-2); z-index: 2; }
+.table-striped > tbody > tr:nth-of-type(odd) > td:first-child { background: var(--surface-2); }
 
 /* ---------- alerts ---------- */
 .alert { border-radius: var(--radius); border-width: 1px; }
