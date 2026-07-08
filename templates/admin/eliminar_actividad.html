@@ -1,15 +1,12 @@
 {% extends 'admin/actividad_list.html' %}
 {% block titulo %}Eliminar actividad — Movimiento Peregrino{% endblock %}
 {% block contenido %}
-    <div class="row">
-        <div class="col-sm-12 ">
-            <h2>Eliminar actividad: {{ actividad }}</h2>
-
-        </div>
-    </div>
-    <div class="alert alert-danger" role="alert">
-        Desea elimininar la actividad: {{ actividad }}?
-    </div>
-    <a class="btn btn-default" href="/actividades/{{ actividad.id }}/eliminada">Si</a>
-    <a class="btn btn-default" href="/actividades">No</a>
+  <h2>Eliminar actividad</h2>
+  <div class="alert alert-danger" role="alert">
+    ¿Seguro que querés eliminar <b>{{ actividad }}</b>? Esta acción no se puede deshacer.
+  </div>
+  <div class="admin-row-actions">
+    <a class="btn btn-danger" href="/actividades/{{ actividad.id }}/eliminada">Eliminar</a>
+    <a class="btn btn-default" href="/actividades">Cancelar</a>
+  </div>
 {% endblock %}
