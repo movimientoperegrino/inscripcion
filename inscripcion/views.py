@@ -608,10 +608,23 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 
 class ActividadList(ListView):
-    #Muestra las actividades que se van a habilitar en 7 dias o menos
-    fechaApertura = timezone.now() + timedelta(days=8)
-    # Muestra las actividades que no finalizaron aun
-    fechafin = timezone.now() - timedelta(days=1)
-    actividades = Actividad.objects.filter(fechaCierre__gte=timezone.now()).order_by("tipo_id", "-fechaApertura")
-    actividades = actividades.filter(fechaFin__gte=fechafin).filter(fechaApertura__lte=fechaApertura)
-    queryset = actividades
+    def get_queryset(self):
+        """
+        Compute queryset per-request.
+
+        If this is defined as a class attribute, it's evaluated at import time and
+        won't reflect new Actividad rows until the server restarts.
+        """
+        # Muestra las actividades que se van a habilitar en 7 dias o menos
+        fecha_apertura = timezone.now() + timedelta(days=8)
+        # Muestra las actividades que no finalizaron aun
+        fecha_fin = timezone.now() - timedelta(days=1)
+
+        qs = (
+            Actividad.objects
+            .filter(fechaCierre__gte=timezone.now())
+            .filter(fechaFin__gte=fecha_fin)
+            .filter(fechaApertura__lte=fecha_apertura)
+            .order_by("tipo_id", "-fechaApertura")
+        )
+        return qs
