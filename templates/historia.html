@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Historia — Movimiento Peregrino{% endblock %}
+{% block navbar %}
+    <li><a href="/">Actividades</a></li>
+{% endblock %}
+{% block contenido %}
+    <h1 class="historia-title">Nuestra historia</h1>
+    <div class="historia-embed">
+        <iframe
+            src="https://cdn.knightlab.com/libs/timeline3/latest/embed/index.html?source=1PYCHig4-0lk0x4Iw8PGf58cmbvABmEG4o5IuL6YNtGo&font=Default&lang=es&initial_zoom=2"
+            title="Línea de tiempo del Movimiento Peregrino"
+            allowfullscreen webkitallowfullscreen mozallowfullscreen frameborder="0"></iframe>
+    </div>
+{% endblock %}

@@ -343,6 +343,22 @@ button:focus-visible, [tabindex]:focus-visible {
 .stepper li.is-active { color: #fff; background: var(--accent); border-color: var(--accent); }
 .stepper li.is-done { color: var(--accent-strong); border-color: var(--accent-soft); background: var(--accent-soft); }
 
+/* ---------- historia (linea de tiempo) ---------- */
+.historia-title { margin: 0 0 18px; }
+.historia-embed {
+  border: 1px solid var(--line);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.historia-embed iframe {
+  display: block;
+  width: 100%;
+  height: 70vh;
+  min-height: 520px;
+  border: 0;
+}
+
 /* ---------- lista de actividades (admin) ---------- */
 .admin-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
 .admin-head h2 { margin: 0; }

@@ -56,6 +56,11 @@ def info_inscripto(request):
     return render(request, 'form.html', context)
 
 
+def historia(request):
+    """Pagina publica con la linea de tiempo (TimelineJS) del Movimiento."""
+    return render(request, 'historia.html', {})
+
+
 
 def iniciar_sesion(request):
     mensaje =""
