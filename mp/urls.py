@@ -26,6 +26,7 @@ urlpatterns = [
 
     # Custom application URLs (using callables instead of string references)
     re_path(r'^$', inscripcion_views.ActividadList.as_view(), name='inicio'),
+    re_path(r'^historia/$', inscripcion_views.historia, name='historia'),
     re_path(r'^form/(?P<form_entry_slug>[\w_\-]+)/$', inscripcion_views.form, name='form'),
     re_path(r'^actividad/(?P<idActividad>\d+)/$', inscripcion_views.inscripcion_actividad, name='actividad'),
     re_path(r'^lista/(?P<idActividad>\d+)/$', inscripcion_views.inscriptos_actividad, name='lista'),
